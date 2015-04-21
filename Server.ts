@@ -10,19 +10,21 @@ class Server {
 
 	constructor() {
 		this.server = Http.createServer();
-		this.server.addListener("request", this.handleRequest.bind(this));
-		this.server.addListener("error", this.handleError.bind(this));
+		this.server.addListener("request", this.onRequest.bind(this));
+		this.server.addListener("error", this.onError.bind(this));
 	}
 
 	start() {
-		this.server.listen(3000, function () {
-			var host = this.server.address().address;
-			var port = this.server.address().port;
-			console.log("Listening at http://%s:%s", host, port);
-		}.bind(this));
+		this.server.listen(3000, this.onStart.bind(this));
+	}
+
+	private onStart() {
+		var host = this.server.address().address;
+		var port = this.server.address().port;
+		console.log("Listening at http://%s:%s", host, port);
 	}
 	
-	private handleRequest(msg : Http.IncomingMessage, resp : Http.ServerResponse) {
+	private onRequest(msg : Http.IncomingMessage, resp : Http.ServerResponse) {
 		var request = Url.parse(msg.url, true);
 		var path = request.pathname.split("/");
 		var api = ApiVersions[path[1]];
@@ -42,7 +44,7 @@ class Server {
 		resp.end();
 	}
 
-	private handleError(err : Error) {
+	private onError(err : Error) {
 		console.log(err);
 	}
 }
