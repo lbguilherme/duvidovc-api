@@ -1,3 +1,4 @@
+import KeyMetrics = require("./KeyMetrics"); KeyMetrics.init();
 import Server = require("./Server");
 
 var server = new Server();
