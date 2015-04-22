@@ -1,6 +1,7 @@
 
 TSC := tsc --target ES5 --noImplicitAny --noEmitOnError --module commonjs
 NODE := node
+NODE_FLAGS := --expose-gc
 
 DECLS := $(wildcard decl/*.d.ts)
 
@@ -8,7 +9,10 @@ watch: $(wildcard *.ts) Makefile
 	@${TSC} --watch --outDir js $(DECLS) main.ts
 
 run: js/main.js
-	@${NODE} $<
+	@${NODE} $(NODE_FLAGS) $<
+
+pm2: js/main.js
+	@PM2_NODE_OPTIONS='$(NODE_FLAGS)' pm2 start $<
 
 clean:
 	@mkdir -p js
