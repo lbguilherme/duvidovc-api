@@ -16,3 +16,13 @@ Tools for building and running:
 - `make js/main.js`: simply build and close.
 
 **warning:** if any building error happens, nothing will be outputed and the js files will be unchanged. You are forced to fix any errors before running.
+
+# Server setup
+
+- `yum update`
+- `yum install nodejs npm nginx git`
+- `mkdir duvido && cd duvido`
+- `git clone git@github.com:lbguilherme/duvidovc-server.git`
+- `cd duvidovc-server`
+- `npm install fbgraph mongodb pmx`
+- `make pm2`
