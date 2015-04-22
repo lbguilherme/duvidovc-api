@@ -15,10 +15,12 @@ class Server {
 	}
 
 	start(port : number) {
+		console.log("Starting server...");
 		this.server.listen(port, this.onStart.bind(this));
 	}
 
 	stop() {
+		console.log("Stopping server...");
 		this.server.close(this.onStop.bind(this));
 	}
 
