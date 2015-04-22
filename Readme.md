@@ -4,7 +4,7 @@ Project runtime dependencies:
 - `npm install fbgraph mongodb pmx`
 
 Tools for building and running:
-- `sudo npm install -g tsc pm2`
+- `sudo npm install -g typescript pm2`
 
 # Makefile
 
