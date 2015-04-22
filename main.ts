@@ -4,6 +4,7 @@ var server = new Server();
 server.start(3000);
 
 process.on("SIGINT", () => {
-	console.log("\rRequested to shutdown. Waiting for all remaining operations to finish.");
+	console.log("\rRequested to shutdown.");
+	console.log("Waiting current operations to finish...");
 	server.stop();
 });
