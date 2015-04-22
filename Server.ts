@@ -14,7 +14,7 @@ class Server {
 		this.server.addListener("error", this.onError.bind(this));
 	}
 
-	start(port) {
+	start(port : number) {
 		this.server.listen(port, this.onStart.bind(this));
 	}
 
