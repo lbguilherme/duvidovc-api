@@ -16,9 +16,9 @@ class Server {
 		this.server.addListener("connection", this.onConnection.bind(this));
 	}
 
-	start(port : number) {
+	start(port : number, host : string) {
 		console.log("Starting server...");
-		this.server.listen(port, this.onStart.bind(this));
+		this.server.listen(port, host, this.onStart.bind(this));
 	}
 
 	stop() {
