@@ -21,4 +21,8 @@ export function init() {
 			reply({error: error, stdout: stdout.toString(), stderr: stderr.toString()});
 		})
 	});
+
+	Pmx.action("gc", function(reply) {
+		reply(global.gc());
+	});
 }
