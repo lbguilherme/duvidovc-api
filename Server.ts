@@ -46,20 +46,20 @@ class Server {
 		var request = Url.parse(msg.url, true);
 		var path = request.pathname.split("/");
 		var api = ApiVersions[path[1]];
-		var endpoint = "/" + path.slice(2).join("/");
+		var endpoint = "_" + path.slice(2).join("_");
 
 		if (!api) {
 			resp.statusCode = 404;
+			resp.end();
 		} else {
 			var endpointFunction = api[endpoint];
 			if (!endpointFunction) {
 				resp.statusCode = 404;
+				resp.end();
 			} else {
-				api[endpoint](resp);
+				api[endpoint](request.query, resp);
 			}
 		}
-
-		resp.end();
 	}
 
 	private onError(err : Error) {
