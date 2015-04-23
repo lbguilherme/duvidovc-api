@@ -19,7 +19,7 @@ clean:
 	@mkdir -p js
 	@rm -f js/*.js
 
-js/main.js: $(wildcard *.ts) Makefile
+js/main.js: $(wildcard src/*.ts) Makefile
 	@${TSC} --outDir js $(DECLS) src/main.ts
 
 .PHONY: run watch clean
