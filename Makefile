@@ -6,7 +6,7 @@ NODE_FLAGS := --expose-gc
 DECLS := $(wildcard decl/*.d.ts)
 
 watch: $(wildcard *.ts) Makefile
-	@${TSC} --watch --outDir js $(DECLS) main.ts
+	@${TSC} --watch --outDir js $(DECLS) src/main.ts
 
 run: js/main.js
 	@${NODE} $(NODE_FLAGS) $<
@@ -20,6 +20,6 @@ clean:
 	@rm -f js/*.js
 
 js/main.js: $(wildcard *.ts) Makefile
-	@${TSC} --outDir js $(DECLS) main.ts
+	@${TSC} --outDir js $(DECLS) src/main.ts
 
 .PHONY: run watch clean
