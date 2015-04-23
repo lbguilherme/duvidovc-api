@@ -4,7 +4,7 @@ import Server = require("./Server");
 var server = new Server();
 server.start(5001, "localhost");
 
-process.title = "duvidovc-serve"
+process.title = "duvidovc-api"
 
 process.on("SIGINT", () => {
 	console.log("\rRequested to shutdown.");
