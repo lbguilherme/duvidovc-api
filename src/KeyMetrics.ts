@@ -2,6 +2,8 @@ import Pmx = require("pmx");
 import ChildProcess = require("child_process");
 
 export function init() {
+	if (!process.send) return;
+
 	Pmx.init();
 
 	Pmx.action("git status", function(reply) {
