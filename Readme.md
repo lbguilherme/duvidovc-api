@@ -1,3 +1,5 @@
+[![Build Status](https://magnum.travis-ci.com/lbguilherme/duvidovc-server.svg?token=2sKW7xqLq7hypWKUFuUt)](https://magnum.travis-ci.com/lbguilherme/duvidovc-server)
+
 # Installation
 
 Project runtime dependencies:
