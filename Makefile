@@ -13,7 +13,7 @@ run: js/main.js
 
 pm2: js/main.js
 	@pm2 stop $< 2>&1 | cat > /dev/null
-	@PM2_NODE_OPTIONS='$(NODE_FLAGS)' pm2 start $<
+	@PM2_NODE_OPTIONS='$(NODE_FLAGS)' pm2 start $< --name duvidovc-api
 
 clean:
 	@mkdir -p js
