@@ -1,5 +1,5 @@
 
-TSC := tsc --target ES5 --noImplicitAny --noEmitOnError --module commonjs
+TSC := tsc --target ES5 --noImplicitAny --noEmitOnError --module commonjs --sourceMap
 NODE := node
 NODE_FLAGS := --expose-gc
 

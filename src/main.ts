@@ -1,3 +1,4 @@
+import SourceMapSupport = require('source-map-support'); SourceMapSupport.install();
 import KeyMetrics = require("./KeyMetrics"); KeyMetrics.init();
 import Server = require("./Server");
 
