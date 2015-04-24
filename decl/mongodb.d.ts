@@ -295,8 +295,8 @@ declare module "mongodb" {
   export interface Collection {
     new (db: Db, collectionName: string, pkFactory?: Object, options?: CollectionCreateOptions): Collection; // is this right?
 
-    insert(query: any, callback: (err: Error, result: any) => void): void;
-    insert(query: any, options: { safe?: any; continueOnError?: boolean; keepGoing?: boolean; serializeFunctions?: boolean; }, callback: (err: Error, result: any) => void): void;
+    insertOne(query: any, callback: (err: Error, result: any) => void): void;
+    insertOne(query: any, options: { safe?: any; continueOnError?: boolean; keepGoing?: boolean; serializeFunctions?: boolean; }, callback: (err: Error, result: any) => void): void;
 
     remove(selector: Object, callback?: (err: Error, result: any) => void): void;
     remove(selector: Object, options: { safe?: any; single?: boolean; }, callback?: (err: Error, result: any) => void): void;
@@ -306,8 +306,8 @@ declare module "mongodb" {
     save(doc: any, callback : (err: Error, result: any) => void): void;
     save(doc: any, options: { safe: any; }, callback : (err: Error, result: any) => void): void;
 
-    update(selector: Object, document: any, callback?: (err: Error, result: any) => void): void;
-    update(selector: Object, document: any, options: { safe?: boolean; upsert?: any; multi?: boolean; serializeFunctions?: boolean; }, callback: (err: Error, result: any) => void): void;
+    updateOne(selector: Object, document: any, callback?: (err: Error, result: any) => void): void;
+    updateOne(selector: Object, document: any, options: { safe?: boolean; upsert?: any; multi?: boolean; serializeFunctions?: boolean; }, callback: (err: Error, result: any) => void): void;
 
     distinct(key: string, query: Object, callback: (err: Error, result: any) => void): void;
     distinct(key: string, query: Object, options: { readPreference: string; }, callback: (err: Error, result: any) => void): void;
