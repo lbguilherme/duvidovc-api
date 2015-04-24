@@ -3,6 +3,7 @@ export = ApiV0;
 import Http = require("http");
 import Graph = require("fbgraph");
 import ApiBase = require("./ApiBase");
+import DB = require("./DB");
 
 class ApiV0 extends ApiBase {
 
@@ -20,13 +21,42 @@ class ApiV0 extends ApiBase {
 
 	_notify_login(params : any, resp : Http.ServerResponse) {
 		var token : string = params.token;
+		var api = this;
+		tryFind();
 
-		Graph.get("me", {access_token: token}, function(err : Graph.Error, user : Graph.User) {
-			if (this.handleGraphError(resp, err)) return;
+		function tryFind() {
+			DB.User.findByToken(token, function(err : Error, user : DB.User) {
+				if (err) fail(err);
+				else if (user) sendReply(user.userId);
+				else getTokenDetails();
+			});
+		}
 
-			resp.write("Your id is '" + user.id + "'.");
+		function getTokenDetails() {
+			Graph.get("me", {access_token: token}, function(err : Graph.Error, user : Graph.User) {
+				if (api.handleGraphError(resp, err)) return;
+
+				addToDatabase(user.id);
+			});
+		}
+
+		function addToDatabase(userId : string) {
+			var user = DB.User.get(userId);
+			user.addToken(token, function(err : Error) {
+				if (err) fail(err);
+				else sendReply(userId);
+			});
+		}
+
+		function fail(err : Error) {
+			resp.write("Error: " + err.message);
 			resp.end();
-		}.bind(this));
+		}
+
+		function sendReply(userId : string) {
+			resp.write("Your id is '" + userId+ "'.");
+			resp.end();
+		}
 	}
 
 }
