@@ -9,6 +9,7 @@ class DB {
 	static connectedCallback : () => void;
 	static db : MongoDB.Db;
 	static users : MongoDB.Collection;
+	static avatars : MongoDB.Collection;
 
 	static init(callback : () => void) {
 		console.log("Connecting to database at '%s' ...", DB.url);
@@ -27,7 +28,8 @@ class DB {
 		}
 
 		this.db = db;
-		this.users = db.collection("users")
+		this.users = db.collection("users");
+		this.avatars = db.collection("avatars");
 		this.connectedCallback();
 	}
 

@@ -4,6 +4,7 @@ import Http = require("http");
 import Graph = require("fbgraph");
 import ApiBase = require("./ApiBase");
 import DB = require("./DB");
+import Facebook = require("./Facebook");
 
 class ApiV0 extends ApiBase {
 
@@ -57,6 +58,10 @@ class ApiV0 extends ApiBase {
 			resp.write("Your id is '" + userId+ "'.");
 			resp.end();
 		}
+	}
+
+	_avatar(params : any, resp : Http.ServerResponse) {
+		new Facebook().sendAvatar(params.id, resp);
 	}
 
 }
