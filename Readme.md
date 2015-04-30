@@ -3,7 +3,7 @@
 # Installation
 
 Project runtime dependencies:
-- `npm install fbgraph mongodb pmx`
+- `npm install fbgraph mongodb pmx source-map-support`
 
 Tools for building and running:
 - `sudo npm install -g typescript pm2`
