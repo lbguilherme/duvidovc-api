@@ -39,7 +39,7 @@ class Server {
 	private onConnection(socket : Net.Socket) {
 		// Imposes a limit to keep-alive connections so that the server
 		// can safetely wait for all sockets to close on stop()
-		socket.setTimeout(2000);
+		socket.setTimeout(5000);
 	}
 	
 	private onRequest(msg : Http.IncomingMessage, resp : Http.ServerResponse) {
