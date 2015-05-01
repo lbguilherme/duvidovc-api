@@ -7,45 +7,21 @@ import Https = require("https");
 import MongoDB = require("mongodb");
 
 class Facebook {
-	token: string
+	static apiVersion = "v2.3"
+
+	token: string;
 
 	constructor(token? : string) {
 		this.token = token;
 	}
 
-	sendAvatar(id : string, resp : Http.ServerResponse) {
-		DB.avatars.find({userId : id}, function(err : Error, cur : MongoDB.Cursor) {
-			if (err) {resp.statusCode = 500; resp.end(); return;}
-			cur.toArray(function(err: Error, results: any[]) {
-				if (err) {resp.statusCode = 500; resp.end(); return;}
-				function send(buff : Buffer) {
-					console.log(buff.length);
-					resp.setHeader("Content-Type", "image/png");
-					resp.write(buff);
-					resp.end();
-				}
-				if (results.length == 0)
-					this.fetchAvatar(id, function(err : Error, buff : Buffer) {
-						if (err) {resp.statusCode = 500; resp.end(); return;}
-						send(buff);
-						var data = new MongoDB.Binary(buff);
-						DB.avatars.insertOne({userId : id, data: data}, function(){});
-					});
-				else {
-					var data : MongoDB.Binary = results[0].data;
-					var buff = data.read(0, data.length());
-					send(buff);
-				}
-			}.bind(this));
-		}.bind(this));
-	}
-
 	fetchAvatar(id : string, callback : (err : Error, buff : Buffer) => void) {
-		Https.get({host: "graph.facebook.com", path: "/"+id+"/picture?type=square&width=300&height=300"},
+		Https.get({host: "graph.facebook.com", path: "/"+Facebook.apiVersion+"/"+id+"/picture?type=square&width=300&height=300"},
 		function(res : Http.IncomingMessage) {
 			res.on("data", function() {}); // noop, but required. Otherwise 'end' will never be fired.
 			res.on("end", function() {
 				var uri = res.headers.location;
+				if (!uri) {callback(new Error("avatar not found"), null); return;}
 				Https.get(uri, function(res : Http.IncomingMessage) {
 					res.setEncoding('binary');
 					var data = ""
@@ -59,5 +35,29 @@ class Facebook {
 			});
 		});
 	}
+
+	fetchMe(callback : (err : Error, userInfo : Facebook.User) => void) {
+		Https.get({host: "graph.facebook.com", path: "/"+Facebook.apiVersion+"/me/?access_token="+this.token},
+		function(res : Http.IncomingMessage) {
+			var data = ""
+			res.on("data", function(chunk : string) {
+				data += chunk;
+			});
+			res.on("end", function() {
+				var obj = JSON.parse(data);
+				if (obj.error)
+					callback(new Error(obj.error.type + ": " + obj.error.message), null);
+				else
+					callback(null, JSON.parse(data));
+			});
+		});
+	}
 	
+}
+
+module Facebook {
+	export type User = {
+		id : string;
+		name : string;
+	}
 }
