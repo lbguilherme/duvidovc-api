@@ -4,7 +4,7 @@ import Http = require("http");
 import Https = require("https");
 
 module Facebook {
-	var url = "https://graph.facebook.com/v2.3"
+	var url = "https://graph.facebook.com/v2.3";
 	
 	export type User = {
 		id : string;
@@ -20,7 +20,7 @@ module Facebook {
 				if (!uri) {callback(new Error("avatar not found"), null); return;}
 				Https.get(uri, function(res : Http.IncomingMessage) {
 					res.setEncoding('binary');
-					var data = ""
+					var data = "";
 					res.on("data", function(chunk : string) {
 						data += chunk;
 					});
@@ -35,7 +35,7 @@ module Facebook {
 	export function fetchMe(token : string, callback : (err : Error, userInfo : Facebook.User) => void) {
 		Https.get(url+"/me/?access_token="+token,
 		function(res : Http.IncomingMessage) {
-			var data = ""
+			var data = "";
 			res.on("data", function(chunk : string) {
 				data += chunk;
 			});
@@ -52,7 +52,7 @@ module Facebook {
 	export function fetchUser(token : string, id : string, callback : (err : Error, userInfo : Facebook.User) => void) {
 		Https.get(url+"/"+id+"/?access_token="+token,
 		function(res : Http.IncomingMessage) {
-			var data = ""
+			var data = "";
 			res.on("data", function(chunk : string) {
 				data += chunk;
 			});
@@ -71,7 +71,7 @@ module Facebook {
 
 		function requestPage(uri : string) {
 			Https.get(uri, function(res : Http.IncomingMessage) {
-				var data = ""
+				var data = "";
 				res.on("data", function(chunk : string) {
 					data += chunk;
 				});
