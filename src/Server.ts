@@ -43,6 +43,7 @@ class Server {
 	}
 	
 	private onRequest(msg : Http.IncomingMessage, resp : Http.ServerResponse) {
+		console.log(msg.url);
 		var request = Url.parse(msg.url, true);
 		var path = request.pathname.split("/");
 		var api = ApiVersions[path[1]];
