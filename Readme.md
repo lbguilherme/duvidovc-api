@@ -3,7 +3,7 @@
 # Installation
 
 Project runtime dependencies:
-- `npm install fbgraph mongodb pmx source-map-support`
+- `npm install mongodb pmx source-map-support`
 
 Tools for building and running:
 - `sudo npm install -g typescript pm2`
@@ -26,5 +26,5 @@ Tools for building and running:
 - `mkdir duvido && cd duvido`
 - `git clone git@github.com:lbguilherme/duvidovc-server.git`
 - `cd duvidovc-server`
-- `npm install fbgraph mongodb pmx`
+- `npm install mongodb pmx source-map-support`
 - `make pm2`
