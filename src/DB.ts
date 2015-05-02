@@ -32,3 +32,13 @@ class DB {
 	}
 
 }
+
+module DB {
+	export type User = {
+		userId : string;
+		tokens : string[];
+		avatar : MongoDB.Binary;
+		friends : string[];
+		name : string;
+	}
+}
