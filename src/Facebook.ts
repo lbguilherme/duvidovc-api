@@ -1,22 +1,18 @@
 export = Facebook;
 
-import Graph = require("fbgraph");
-import DB = require("./DB");
 import Http = require("http");
 import Https = require("https");
-import MongoDB = require("mongodb");
 
-class Facebook {
-	static apiVersion = "v2.3"
-
-	token: string;
-
-	constructor(token? : string) {
-		this.token = token;
+module Facebook {
+	var url = "https://graph.facebook.com/v2.3"
+	
+	export type User = {
+		id : string;
+		name : string;
 	}
 
-	fetchAvatar(id : string, callback : (err : Error, buff : Buffer) => void) {
-		Https.get({host: "graph.facebook.com", path: "/"+Facebook.apiVersion+"/"+id+"/picture?type=square&width=300&height=300"},
+	export function fetchAvatar(id : string, callback : (err : Error, buff : Buffer) => void) {
+		Https.get(url+"/"+id+"/picture?type=square&width=300&height=300",
 		function(res : Http.IncomingMessage) {
 			res.on("data", function() {}); // noop, but required. Otherwise 'end' will never be fired.
 			res.on("end", function() {
@@ -36,8 +32,25 @@ class Facebook {
 		});
 	}
 
-	fetchMe(callback : (err : Error, userInfo : Facebook.User) => void) {
-		Https.get({host: "graph.facebook.com", path: "/"+Facebook.apiVersion+"/me/?access_token="+this.token},
+	export function fetchMe(token : string, callback : (err : Error, userInfo : Facebook.User) => void) {
+		Https.get(url+"/me/?access_token="+token,
+		function(res : Http.IncomingMessage) {
+			var data = ""
+			res.on("data", function(chunk : string) {
+				data += chunk;
+			});
+			res.on("end", function() {
+				var obj = JSON.parse(data);
+				if (obj.error)
+					callback(new Error(obj.error.type + ": " + obj.error.message), null);
+				else
+					callback(null, JSON.parse(data));
+			});
+		});
+	}
+
+	export function fetchUser(token : string, id : string, callback : (err : Error, userInfo : Facebook.User) => void) {
+		Https.get(url+"/"+id+"/?access_token="+token,
 		function(res : Http.IncomingMessage) {
 			var data = ""
 			res.on("data", function(chunk : string) {
@@ -53,11 +66,35 @@ class Facebook {
 		});
 	}
 	
-}
+	export function fetchFriends(token : string, callback : (err : Error, ids : string[]) => void) {
+		var ids : string[] = [];
 
-module Facebook {
-	export type User = {
-		id : string;
-		name : string;
+		function requestPage(uri : string) {
+			Https.get(uri, function(res : Http.IncomingMessage) {
+				var data = ""
+				res.on("data", function(chunk : string) {
+					data += chunk;
+				});
+				res.on("end", function() {
+					processPage(JSON.parse(data));
+				});
+			});
+		}
+
+		function processPage(obj : any) {
+			if (obj.error) {
+				callback(new Error(obj.error.type + ": " + obj.error.message), null);
+				return;
+			}
+			for (var i = 0; i < obj.data.length; ++i) {
+				ids.push(obj.data[i].id);
+			}
+			if (obj.paging && obj.paging.next)
+				requestPage(obj.paging.next);
+			else
+				callback(null, ids);
+		}
+
+		requestPage(url+"/me/friends/?access_token="+token);
 	}
 }
