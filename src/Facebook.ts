@@ -1,6 +1,5 @@
 export = Facebook;
 
-import Http = require("http");
 import Https = require("https");
 
 module Facebook {
@@ -12,13 +11,12 @@ module Facebook {
 	}
 
 	export function fetchAvatar(id : string, callback : (err : Error, buff : Buffer) => void) {
-		Https.get(url+"/"+id+"/picture?type=square&width=300&height=300",
-		function(res : Http.IncomingMessage) {
+		Https.get(url+"/"+id+"/picture?type=square&width=300&height=300", function(res) {
 			res.on("data", function() {}); // noop, but required. Otherwise 'end' will never be fired.
 			res.on("end", function() {
 				var uri = res.headers.location;
 				if (!uri) {callback(new Error("avatar not found"), null); return;}
-				Https.get(uri, function(res : Http.IncomingMessage) {
+				Https.get(uri, function(res ) {
 					res.setEncoding('binary');
 					var data = "";
 					res.on("data", function(chunk : string) {
@@ -33,8 +31,7 @@ module Facebook {
 	}
 
 	export function fetchMe(token : string, callback : (err : Error, userInfo : Facebook.User) => void) {
-		Https.get(url+"/me/?access_token="+token,
-		function(res : Http.IncomingMessage) {
+		Https.get(url+"/me/?access_token="+token, function(res) {
 			var data = "";
 			res.on("data", function(chunk : string) {
 				data += chunk;
@@ -50,8 +47,7 @@ module Facebook {
 	}
 
 	export function fetchUser(token : string, id : string, callback : (err : Error, userInfo : Facebook.User) => void) {
-		Https.get(url+"/"+id+"/?access_token="+token,
-		function(res : Http.IncomingMessage) {
+		Https.get(url+"/"+id+"/?access_token="+token, function(res) {
 			var data = "";
 			res.on("data", function(chunk : string) {
 				data += chunk;
@@ -71,7 +67,7 @@ module Facebook {
 		var names : string[] = [];
 
 		function requestPage(uri : string) {
-			Https.get(uri, function(res : Http.IncomingMessage) {
+			Https.get(uri, function(res) {
 				var data = "";
 				res.on("data", function(chunk : string) {
 					data += chunk;

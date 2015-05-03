@@ -8,7 +8,7 @@ class DB {
 
 	static connectedCallback : () => void;
 	static db : MongoDB.Db;
-	static users : MongoDB.Collection;
+	static users : DB.Collection<DB.User>;
 
 	static init(callback : () => void) {
 		console.log("Connecting to database at '%s' ...", DB.url);
@@ -34,6 +34,19 @@ class DB {
 }
 
 module DB {
+	export interface Collection<T> extends MongoDB.Collection {
+		updateOne(selector: Object, document: any, callback?: (err: Error) => void): void;
+    	updateOne(selector: Object, document: any, options: { safe?: boolean; upsert?: any; multi?: boolean; serializeFunctions?: boolean; }, callback?: (err: Error) => void): void;
+
+		findOne(callback?: (err: Error, result: T) => void): MongoDB.Cursor;
+		findOne(selector: Object, callback?: (err: Error, result: T) => void): MongoDB.Cursor;
+		findOne(selector: Object, fields: any, callback?: (err: Error, result: T) => void): MongoDB.Cursor;
+		findOne(selector: Object, options: MongoDB.CollectionFindOptions, callback?: (err: Error, result: T) => void): MongoDB.Cursor;
+		findOne(selector: Object, fields: any, options: MongoDB.CollectionFindOptions, callback?: (err: Error, result: T) => void): MongoDB.Cursor;
+		findOne(selector: Object, fields: any, skip: number, limit: number, callback?: (err: Error, result: T) => void): MongoDB.Cursor;
+		findOne(selector: Object, fields: any, skip: number, limit: number, timeout: number, callback?: (err: Error, result: T) => void): MongoDB.Cursor;
+	}
+	
 	export type User = {
 		userId : string;
 		tokens : string[];
