@@ -66,8 +66,9 @@ module Facebook {
 		});
 	}
 	
-	export function fetchFriends(token : string, callback : (err : Error, ids : string[]) => void) {
+	export function fetchFriends(token : string, callback : (err : Error, ids : string[], names : string[]) => void) {
 		var ids : string[] = [];
+		var names : string[] = [];
 
 		function requestPage(uri : string) {
 			Https.get(uri, function(res : Http.IncomingMessage) {
@@ -83,16 +84,17 @@ module Facebook {
 
 		function processPage(obj : any) {
 			if (obj.error) {
-				callback(new Error(obj.error.type + ": " + obj.error.message), null);
+				callback(new Error(obj.error.type + ": " + obj.error.message), null, null);
 				return;
 			}
 			for (var i = 0; i < obj.data.length; ++i) {
 				ids.push(obj.data[i].id);
+				names.push(obj.data[i].name);
 			}
 			if (obj.paging && obj.paging.next)
 				requestPage(obj.paging.next);
 			else
-				callback(null, ids);
+				callback(null, ids, names);
 		}
 
 		requestPage(url+"/me/friends/?access_token="+token);

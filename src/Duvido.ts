@@ -15,7 +15,7 @@ module Duvido {
 		addTokenAsync(token : string) {
 			var key = {id : this.id};
 			var data = {$addToSet: { tokens: token }, $set: {userId : this.id}};
-			DB.users.updateOne(key, data, {upsert: true}, function(err : Error, res : any) {});
+			DB.users.updateOne(key, data, {upsert: true}, function() {});
 		}
 
 		static fromToken(token : string, callback : (err : Error, user : User) => void) {
@@ -51,7 +51,7 @@ module Duvido {
 			var data = {$set: {userId : this.id, avatar: avatar}};
 			DB.users.findOne(key, function(err : Error, user : DB.User) {
 				if (user)
-					DB.users.updateOne(key, data, {upsert: true}, function(err : Error, res : any) {});
+					DB.users.updateOne(key, data, {upsert: true}, function() {});
 			});
 		}
 
@@ -76,7 +76,7 @@ module Duvido {
 		setFriendsAsync(friends : string[]) {
 			var key = {userId : this.id};
 			var data = {$set: {userId : this.id, friends: friends}};
-			DB.users.updateOne(key, data, {upsert: true}, function(err : Error, res : any) {});
+			DB.users.updateOne(key, data, {upsert: true}, function() {});
 		}
 
 		getFriends(callback : (err : Error, friends : User[]) => void) {
@@ -93,10 +93,12 @@ module Duvido {
 					buildUserListAndFinish(user.friends);
 				} else if (user && user.tokens) {
 					var token = user.tokens[user.tokens.length - 1];
-					Facebook.fetchFriends(token, function(err : Error, ids : string[]) {
+					Facebook.fetchFriends(token, function(err : Error, ids : string[], names : string[]) {
 						if (err) { callback(err, null); return; }
 						buildUserListAndFinish(ids);
 						_this.setFriendsAsync(ids);
+						for (var i = 0; i < ids.length; ++i)
+							new User(ids[i]).setNameAsync(names[i]);
 					});
 				} else {
 					callback(new Error("no token available to get friends"), null);
@@ -107,7 +109,7 @@ module Duvido {
 		setNameAsync(name : string) {
 			var key = {userId : this.id};
 			var data = {$set: {userId : this.id, name: name}};
-			DB.users.updateOne(key, data, {upsert: true}, function(err : Error, res : any) {});
+			DB.users.updateOne(key, data, {upsert: true}, function() {});
 		}
 
 		getName(token : string, callback : (err : Error, name : string) => void) {
