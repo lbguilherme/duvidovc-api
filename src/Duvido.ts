@@ -11,11 +11,19 @@ module Duvido {
 		constructor(id : string) {
 			this.id = id;
 		}
+		
+		setCreationTimeIfNeededAsync() {
+			DB.users.findOne({userId : this.id}, function(err, user) {
+				if (err || !user) return;
+				if (user.creationTime) return;
+				DB.users.updateOne({userId : this.id}, {$set: {creationTime: Date.now()}});
+			});
+		}
 
 		addTokenAsync(token : string) {
 			var key = {id : this.id};
 			var data = {$addToSet: { tokens: token }, $set: {userId : this.id}};
-			DB.users.updateOne(key, data, {upsert: true});
+			DB.users.updateOne(key, data, {upsert: true}, this.setCreationTimeIfNeededAsync.bind(this));
 		}
 
 		static fromToken(token : string, callback : (err : Error, user : User) => void) {
@@ -51,7 +59,7 @@ module Duvido {
 			var data = {$set: {userId : this.id, avatar: avatar}};
 			DB.users.findOne(key, function(err, user) {
 				if (user)
-					DB.users.updateOne(key, data, {upsert: true});
+					DB.users.updateOne(key, data, {upsert: true}, this.setCreationTimeIfNeededAsync.bind(this));
 			});
 		}
 
@@ -76,7 +84,7 @@ module Duvido {
 		setFriendsAsync(friends : string[]) {
 			var key = {userId : this.id};
 			var data = {$set: {userId : this.id, friends: friends}};
-			DB.users.updateOne(key, data, {upsert: true});
+			DB.users.updateOne(key, data, {upsert: true}, this.setCreationTimeIfNeededAsync.bind(this));
 		}
 
 		getFriends(callback : (err : Error, friends : User[]) => void) {
@@ -109,7 +117,7 @@ module Duvido {
 		setNameAsync(name : string) {
 			var key = {userId : this.id};
 			var data = {$set: {userId : this.id, name: name}};
-			DB.users.updateOne(key, data, {upsert: true});
+			DB.users.updateOne(key, data, {upsert: true}, this.setCreationTimeIfNeededAsync.bind(this));
 		}
 
 		getName(token : string, callback : (err : Error, name : string) => void) {
