@@ -47,11 +47,22 @@ module DB {
 		findOne(selector: Object, fields: any, skip: number, limit: number, timeout: number, callback?: (err: Error, result: T) => void): MongoDB.Cursor;
 	}
 	
-	export type User = {
-		userId : string;
-		tokens : string[];
-		avatar : MongoDB.Binary;
-		friends : string[];
-		name : string;
+	export interface User {
+		creationTime : Date
+		userId : string
+		tokens? : string[]
+		avatar? : MongoDB.Binary
+		friends? : string[]
+		name? : string
+	}
+	
+	export interface Challenge {
+		creationTime : Date
+		ownerId : string
+		title : string
+		descr : string
+		award : string
+		targetsId : string[]
+		duration : number
 	}
 }
