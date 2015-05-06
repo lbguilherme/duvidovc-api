@@ -6,7 +6,7 @@ import Duvido = require("./Duvido");
 
 class ApiV0 extends ApiBase {
 
-	_notify_login(params : any, resp : Http.ServerResponse) {
+	_login(params : any, resp : Http.ServerResponse) {
 		var token = params.token;
 		Duvido.User.fromToken(token, function(err : Error, user : Duvido.User) {
 			if (err) {
@@ -14,7 +14,7 @@ class ApiV0 extends ApiBase {
 				resp.write("Error: " + err.message);
 				resp.end();
 			} else {
-				resp.write("Your id is '" + user.id + "'.");
+				resp.write(JSON.stringify({id: user.id}));
 				resp.end();
 			}
 		});
