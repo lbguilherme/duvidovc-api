@@ -9,6 +9,7 @@ class DB {
 	static connectedCallback : () => void;
 	static db : MongoDB.Db;
 	static users : DB.Collection<DB.User>;
+	static tokens : DB.Collection<DB.Token>;
 
 	static init(callback : () => void) {
 		console.log("Connecting to database at '%s' ...", DB.url);
@@ -28,6 +29,7 @@ class DB {
 
 		this.db = db;
 		this.users = db.collection("users");
+		this.tokens = db.collection("tokens");
 		this.connectedCallback();
 	}
 
@@ -47,10 +49,15 @@ module DB {
 		findOne(selector: Object, fields: any, skip: number, limit: number, timeout: number, callback?: (err: Error, result: T) => void): MongoDB.Cursor;
 	}
 	
+	export interface Token {
+		token : string
+		userId : string
+		expires : Date
+	};
+	
 	export interface User {
 		creationTime : Date
-		userId : string
-		tokens? : string[]
+		id : string
 		avatar? : MongoDB.Binary
 		friends? : string[]
 		name? : string
@@ -64,5 +71,6 @@ module DB {
 		award : string
 		targetsId : string[]
 		duration : number
+		image : MongoDB.Binary
 	}
 }

@@ -18,18 +18,18 @@ module Facebook {
 	};
 
 	export function fetchAvatar(id : string, callback : (err : Error, buff : Buffer) => void) {
-		Https.get(url+"/"+id+"/picture?type=square&width=300&height=300", function(res) {
-			res.on("data", function() {}); // noop, but required. Otherwise 'end' will never be fired.
-			res.on("end", function() {
+		Https.get(url+"/"+id+"/picture?type=square&width=300&height=300", (res) => {
+			res.on("data", () => {}); // noop, but required. Otherwise 'end' will never be fired.
+			res.on("end", () => {
 				var uri = res.headers.location;
 				if (!uri) {callback(new Error("avatar not found"), null); return;}
-				Https.get(uri, function(res ) {
+				Https.get(uri, (res) => {
 					res.setEncoding('binary');
 					var data = "";
-					res.on("data", function(chunk : string) {
+					res.on("data", (chunk : string) => {
 						data += chunk;
 					});
-					res.on("end", function() {
+					res.on("end", () => {
 						callback(null, new Buffer(data, "binary"));
 					});
 				});
@@ -38,12 +38,12 @@ module Facebook {
 	}
 
 	export function fetchMe(token : string, callback : (err : Error, userInfo : Facebook.User) => void) {
-		Https.get(url+"/me/?access_token="+token, function(res) {
+		Https.get(url+"/me/?access_token="+token, (res) => {
 			var data = "";
-			res.on("data", function(chunk : string) {
+			res.on("data", (chunk : string) => {
 				data += chunk;
 			});
-			res.on("end", function() {
+			res.on("end", () => {
 				var obj = JSON.parse(data);
 				if (obj.error)
 					callback(new Error(obj.error.type + ": " + obj.error.message), null);
@@ -54,12 +54,12 @@ module Facebook {
 	}
 
 	export function fetchUser(token : string, id : string, callback : (err : Error, userInfo : Facebook.User) => void) {
-		Https.get(url+"/"+id+"/?access_token="+token, function(res) {
+		Https.get(url+"/"+id+"/?access_token="+token, (res) => {
 			var data = "";
-			res.on("data", function(chunk : string) {
+			res.on("data", (chunk : string) => {
 				data += chunk;
 			});
-			res.on("end", function() {
+			res.on("end", () => {
 				var obj = JSON.parse(data);
 				if (obj.error)
 					callback(new Error(obj.error.type + ": " + obj.error.message), null);
@@ -74,12 +74,12 @@ module Facebook {
 		var names : string[] = [];
 
 		function requestPage(uri : string) {
-			Https.get(uri, function(res) {
+			Https.get(uri, (res) => {
 				var data = "";
-				res.on("data", function(chunk : string) {
+				res.on("data", (chunk : string) => {
 					data += chunk;
 				});
-				res.on("end", function() {
+				res.on("end", () => {
 					processPage(JSON.parse(data));
 				});
 			});

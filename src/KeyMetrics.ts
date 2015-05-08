@@ -6,25 +6,25 @@ export function init() {
 
 	Pmx.init();
 
-	Pmx.action("git status", function(reply) {
-		ChildProcess.exec("git status", function callback(error : Error, stdout : Buffer, stderr : Buffer){
+	Pmx.action("git status", (reply) => {
+		ChildProcess.exec("git status", (error : Error, stdout : Buffer, stderr : Buffer) => {
 			reply({error: error, stdout: stdout.toString(), stderr: stderr.toString()});
 		})
 	});
 
-	Pmx.action("git pull", function(reply) {
-		ChildProcess.exec("git pull", function callback(error : Error, stdout : Buffer, stderr : Buffer){
+	Pmx.action("git pull", (reply) => {
+		ChildProcess.exec("git pull", (error : Error, stdout : Buffer, stderr : Buffer) => {
 			reply({error: error, stdout: stdout.toString(), stderr: stderr.toString()});
 		})
 	});
 
-	Pmx.action("build", function(reply) {
-		ChildProcess.exec("make js/main.js", function callback(error : Error, stdout : Buffer, stderr : Buffer){
+	Pmx.action("build", (reply) => {
+		ChildProcess.exec("make js/main.js", (error : Error, stdout : Buffer, stderr : Buffer) => {
 			reply({error: error, stdout: stdout.toString(), stderr: stderr.toString()});
 		})
 	});
 
-	Pmx.action("gc", function(reply) {
+	Pmx.action("gc", (reply) => {
 		reply(global.gc());
 	});
 }

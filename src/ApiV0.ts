@@ -13,7 +13,7 @@ class ApiV0 extends ApiBase {
 			return;
 		}
 		
-		Duvido.User.fromToken(token, function(err : Error, user : Duvido.User) {
+		Duvido.User.fromToken(token, (err, user) => {
 			if (err) {
 				this.fail(err.message, resp);
 			} else {
@@ -25,7 +25,7 @@ class ApiV0 extends ApiBase {
 
 	_avatar(params : any, resp : Http.ServerResponse) {
 		var user = new Duvido.User(params.id);
-		user.getAvatar(function(err : Error, buf : Buffer) {
+		user.getAvatar((err, buf) => {
 			if (err) {
 				this.fail(err.message, resp);
 			} else {
@@ -38,21 +38,21 @@ class ApiV0 extends ApiBase {
 
 	_friends(params : any, resp : Http.ServerResponse) {
 		var user = new Duvido.User(params.id);
-		user.getToken(function(err : Error, token: string) {
+		user.getToken((err, token) => {
 			if (err) {
 				this.fail(err.message, resp);
 				return;
 			}
-			user.getFriends(function(err : Error, friends: Duvido.User[]) {
+			user.getFriends((err, friends) => {
 				if (err) {
 					this.fail(err.message, resp);
 				} else {
 					var friendsList : {id : string, name : string}[] = [];
 					var count = 0;
-					for (var i = 0; i < friends.length; ++i) {(function(){
+					for (var i = 0; i < friends.length; ++i) {(() => {
 						var obj = {id: friends[i].id, name: "?"}
 						friendsList.push(obj);
-						friends[i].getName(token, function(err : Error, name : string) {
+						friends[i].getName(token, (err, name) => {
 							if (!err)
 								obj.name = name;
 							else
