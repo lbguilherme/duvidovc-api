@@ -16,9 +16,9 @@ module Duvido {
 		
 		setCreationTimeIfNeededAsync() {
 			DB.users.findOne({id : this.id}, (err, user) => {
-				if (err || !user) return;
-				if (user.creationTime) return;
-				DB.users.updateOne({id : this.id}, {$set: {creationTime: Date.now()}});
+				if (err) return;
+				if (user && user.creationTime) return;
+				DB.users.updateOne({id : this.id}, {$set: {creationTime: Date.now()}}, {upsert: true});
 			});
 		}
 
