@@ -104,7 +104,7 @@ module Facebook {
 	}
 	
 	export function fetchTokenInfo(token : string, callback : (err : Error, info : TokenInfo) => void) {
-		Https.get(url+"/oauth/access_token_info/?client_id=1497042670584041&access_token="+token, (res) => {
+		Https.get(url+"/oauth/access_token_info?client_id=1497042670584041&access_token="+token, (res) => {
 			var data = "";
 			res.on("data", (chunk : string) => {
 				data += chunk;
