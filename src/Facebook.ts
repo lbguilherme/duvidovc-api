@@ -8,7 +8,14 @@ module Facebook {
 	export type User = {
 		id : string;
 		name : string;
-	}
+	};
+	
+	export type TokenInfo = {
+		access_token : string;
+		token_type : string;
+		expires_in : number;
+		auth_type : string;
+	};
 
 	export function fetchAvatar(id : string, callback : (err : Error, buff : Buffer) => void) {
 		Https.get(url+"/"+id+"/picture?type=square&width=300&height=300", function(res) {
@@ -94,5 +101,21 @@ module Facebook {
 		}
 
 		requestPage(url+"/me/friends/?access_token="+token);
+	}
+	
+	export function fetchTokenInfo(token : string, callback : (err : Error, info : TokenInfo) => void) {
+		Https.get(url+"/oauth/access_token_info/?client_id=1497042670584041&access_token="+token, (res) => {
+			var data = "";
+			res.on("data", (chunk : string) => {
+				data += chunk;
+			});
+			res.on("end", () => {
+				var obj = JSON.parse(data);
+				if (obj.error)
+					callback(new Error(obj.error.type + ": " + obj.error.message), null);
+				else
+					callback(null, JSON.parse(data));
+			});
+		});
 	}
 }
