@@ -23,10 +23,11 @@ module Duvido {
 		addTokenAsync(token : string) {
 			var key = {token : token};
 			var data = {$set: {token : token, userId : this.id}};
-			DB.users.updateOne(key, data, {upsert: true});
+			DB.tokens.updateOne(key, data, {upsert: true});
 			Facebook.fetchTokenInfo(token, (err, tokenInfo) => {
-				var data = {$set: {token : token, expires : tokenInfo.expires_in}};
-				DB.users.updateOne(key, data, {upsert: true});
+				if (err) {console.log(err); return;}
+				var data = {$set: {token : token, expireTime : Date.now() + tokenInfo.expires_in}};
+				DB.tokens.updateOne(key, data, {upsert: true});
 			});
 		}
 

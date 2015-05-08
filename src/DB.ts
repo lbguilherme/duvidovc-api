@@ -52,7 +52,7 @@ module DB {
 	export interface Token {
 		token : string
 		userId : string
-		expires : Date
+		expireTime? : Date
 	};
 	
 	export interface User {
