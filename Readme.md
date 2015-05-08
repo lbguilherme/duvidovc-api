@@ -1,4 +1,4 @@
-[![Build Status](https://magnum.travis-ci.com/lbguilherme/duvidovc-server.svg?token=2sKW7xqLq7hypWKUFuUt)](https://magnum.travis-ci.com/lbguilherme/duvidovc-server)
+[![Build Status](https://magnum.travis-ci.com/lbguilherme/duvidovc-api.svg?token=2sKW7xqLq7hypWKUFuUt&branch=master)](https://magnum.travis-ci.com/lbguilherme/duvidovc-api)
 
 # Installation
 
