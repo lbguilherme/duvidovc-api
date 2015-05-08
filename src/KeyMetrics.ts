@@ -1,3 +1,5 @@
+/// <reference path="../decl/pmx.d.ts" />
+
 import Pmx = require("pmx");
 import ChildProcess = require("child_process");
 

@@ -1,3 +1,5 @@
+/// <reference path="../decl/mongodb.d.ts" />
+
 export = Duvido;
 
 import DB = require("./DB");

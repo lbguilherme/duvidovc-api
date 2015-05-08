@@ -1,3 +1,5 @@
+/// <reference path="../decl/node.d.ts" />
+
 export = Server;
 
 import Net = require("net");

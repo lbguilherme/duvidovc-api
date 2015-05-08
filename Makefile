@@ -3,10 +3,8 @@ TSC := tsc --target ES5 --noImplicitAny --noEmitOnError --module commonjs --sour
 NODE := node
 NODE_FLAGS := --expose-gc
 
-DECLS := $(wildcard decl/*.d.ts)
-
 watch: $(wildcard *.ts) Makefile
-	@${TSC} --watch --outDir js $(DECLS) src/main.ts
+	@${TSC} --watch --outDir js src/main.ts
 
 run: js/main.js
 	@${NODE} $(NODE_FLAGS) $<
@@ -20,6 +18,6 @@ clean:
 	@rm -f js/*.js
 
 js/main.js: $(wildcard src/*.ts) Makefile
-	@${TSC} --outDir js $(DECLS) src/main.ts
+	@${TSC} --outDir js src/main.ts
 
 .PHONY: run watch clean
