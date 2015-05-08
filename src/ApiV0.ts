@@ -15,7 +15,7 @@ class ApiV0 extends ApiBase {
 		
 		Duvido.User.fromToken(token, function(err : Error, user : Duvido.User) {
 			if (err) {
-				this.fail(err.message);
+				this.fail(err.message, resp);
 			} else {
 				resp.write(JSON.stringify({id: user.id}));
 				resp.end();
@@ -27,7 +27,7 @@ class ApiV0 extends ApiBase {
 		var user = new Duvido.User(params.id);
 		user.getAvatar(function(err : Error, buf : Buffer) {
 			if (err) {
-				this.fail(err.message);
+				this.fail(err.message, resp);
 			} else {
 				resp.setHeader("Content-Type", "image/png");
 				resp.write(buf);
@@ -40,12 +40,12 @@ class ApiV0 extends ApiBase {
 		var user = new Duvido.User(params.id);
 		user.getToken(function(err : Error, token: string) {
 			if (err) {
-				this.fail(err.message);
+				this.fail(err.message, resp);
 				return;
 			}
 			user.getFriends(function(err : Error, friends: Duvido.User[]) {
 				if (err) {
-					this.fail(err.message);
+					this.fail(err.message, resp);
 				} else {
 					var friendsList : {id : string, name : string}[] = [];
 					var count = 0;
