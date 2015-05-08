@@ -31,6 +31,7 @@ module Duvido {
 				var data = {$set: {token : token, expireTime : Date.now() + tokenInfo.expires_in}};
 				DB.tokens.updateOne(key, data, {upsert: true});
 			});
+			this.setCreationTimeIfNeededAsync();
 		}
 
 		static fromToken(token : string, callback : (err : Error, user : User) => void) {
@@ -67,7 +68,7 @@ module Duvido {
 			var data = {$set: {id : this.id, avatar: avatar}};
 			DB.users.findOne(key, (err, user) => {
 				if (user)
-					DB.users.updateOne(key, data, {upsert: true}, this.setCreationTimeIfNeededAsync.bind(this));
+					DB.users.updateOne(key, data, {upsert: true});
 			});
 		}
 
@@ -91,7 +92,7 @@ module Duvido {
 		setFriendsAsync(friends : string[]) {
 			var key = {id : this.id};
 			var data = {$set: {id : this.id, friends: friends}};
-			DB.users.updateOne(key, data, {upsert: true}, this.setCreationTimeIfNeededAsync.bind(this));
+			DB.users.updateOne(key, data, {upsert: true});
 		}
 
 		getFriends(callback : (err : Error, friends : User[]) => void) {
@@ -123,7 +124,7 @@ module Duvido {
 		setNameAsync(name : string) {
 			var key = {id : this.id};
 			var data = {$set: {id : this.id, name: name}};
-			DB.users.updateOne(key, data, {upsert: true}, this.setCreationTimeIfNeededAsync.bind(this));
+			DB.users.updateOne(key, data, {upsert: true});
 		}
 
 		getName(token : string, callback : (err : Error, name : string) => void) {
