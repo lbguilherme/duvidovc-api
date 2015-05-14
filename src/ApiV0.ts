@@ -17,8 +17,10 @@ class ApiV0 extends ApiBase {
 			if (err) {
 				this.fail(err.message, resp);
 			} else {
-				resp.write(JSON.stringify({id: user.id}));
-				resp.end();
+				user.getName(token, (err, name) => {
+					resp.write(JSON.stringify({id: user.id, name: name}));
+					resp.end();
+				});
 			}
 		});
 	}
