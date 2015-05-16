@@ -18,6 +18,7 @@ class ApiV0 extends ApiBase {
 				this.fail(err.message, resp);
 			} else {
 				user.getName(token, (err, name) => {
+					resp.setHeader("Content-Type", "application/json");
 					resp.write(JSON.stringify({id: user.id, name: name}));
 					resp.end();
 				});
@@ -61,6 +62,7 @@ class ApiV0 extends ApiBase {
 								console.log(err);
 							count += 1;
 							if (count == friends.length) {
+								resp.setHeader("Content-Type", "application/json");
 								resp.write(JSON.stringify(friendsList));
 								resp.end();
 							}

@@ -7,6 +7,7 @@ class ApiBase {
 	
 	fail(message : string, resp : Http.ServerResponse) {
 		resp.statusCode = 500;
+		resp.setHeader("Content-Type", "application/json");
 		resp.write("Error: " + message);
 		resp.end();
 	}
