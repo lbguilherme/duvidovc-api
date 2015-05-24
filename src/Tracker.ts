@@ -14,6 +14,7 @@ class Tracker {
     endpoint : string;
     apiVersion : string;
     userId : string;
+    name : string;
     start : number;
     
     constructor() {
@@ -35,6 +36,10 @@ class Tracker {
     setUserId(userId : string) {
         this.userId = userId;
     }
+    
+    setName(name : string) {
+        this.name = name;
+    }
 	
     end() {
         var now = new Date();
@@ -48,7 +53,7 @@ class Tracker {
             cip: this.ip,
             _id: Crypto.createHash('md5').update(this.userId).digest('hex').substr(0, 16),
             rand: Crypto.randomBytes(16).toString('hex'),
-            uid: this.userId,
+            uid: this.userId + " (" + this.name + ")",
             gt_ms: now.getTime() - this.start,
             h: now.getHours(),
             m: now.getMinutes(),

@@ -128,16 +128,22 @@ module Duvido {
 		}
 
 		getName(token : string, callback : (err : Error, name : string) => void) {
-			var _this = this;
+			if (token == null) {
+				this.getToken((err, token) => {
+					if (err) { callback(err, null); return; }
+					this.getName(token, callback);
+				});
+				return;
+			}
 			DB.users.findOne({id : this.id}, (err, user) => {
 				if (err) { callback(err, null); return; }
 				if (user && user.name) {
 					callback(null, user.name);
 				} else {
-					Facebook.fetchUser(token, _this.id, (err, userInfo) => {
+					Facebook.fetchUser(token, this.id, (err, userInfo) => {
 						if (err) { callback(err, null); return; }
 						callback(null, userInfo.name);
-						_this.setNameAsync(userInfo.name);
+						this.setNameAsync(userInfo.name);
 					});
 				}
 			});

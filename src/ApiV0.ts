@@ -23,6 +23,7 @@ class ApiV0 extends ApiBase {
 					resp.setHeader("Content-Type", "application/json");
 					resp.write(JSON.stringify({id: user.id, name: name}));
 					resp.end();
+					tracker.setName(name);
 					tracker.end();
 				});
 			}
@@ -39,7 +40,10 @@ class ApiV0 extends ApiBase {
 				resp.setHeader("Content-Type", "image/png");
 				resp.write(buf);
 				resp.end();
-				tracker.end();
+				user.getName(null, (err, name) => {
+					tracker.setName(name);
+					tracker.end();
+				});
 			}
 		});
 	}
@@ -71,7 +75,10 @@ class ApiV0 extends ApiBase {
 								resp.setHeader("Content-Type", "application/json");
 								resp.write(JSON.stringify(friendsList));
 								resp.end();
-								tracker.end();
+								user.getName(token, (err, name) => {
+									tracker.setName(name);
+									tracker.end();
+								});
 							}
 						});
 					})()}
