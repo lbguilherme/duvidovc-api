@@ -7,7 +7,7 @@ import PiwikTracker = require("piwik-tracker");
 import Http = require("http");
 import Crypto = require("crypto");
 
-var piwik = new PiwikTracker(2, "http://piwik.duvido.vc/index.php");
+var piwik = new PiwikTracker(2, "http://piwik.duvido.vc/piwik.php");
 
 class Tracker {
     ip : string;
