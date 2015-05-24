@@ -47,7 +47,7 @@ class Server {
 	
 	private onRequest(msg : Http.IncomingMessage, resp : Http.ServerResponse) {
 		console.log(msg.url);
-		var ip = msg.socket.remoteAddress;
+		var ip = msg.headers["x-forwarded-for"] || msg.socket.remoteAddress;
 		var request = Url.parse(msg.url, true);
 		var path = request.pathname.split("/");
 		var apiVersion = path[1];
