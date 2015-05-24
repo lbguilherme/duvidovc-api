@@ -47,7 +47,7 @@ class Tracker {
             url: "http://api.duvido.vc" + this.endpoint,
             action_name: 'API',
             cvar: JSON.stringify({
-                "1": ["API version", this.apiVersion]
+                "1": ["API", this.apiVersion]
             }),
             token_auth: "d75d16ff9e650b074f132f1de028ba81",
             cip: this.ip,
