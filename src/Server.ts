@@ -6,6 +6,7 @@ import Net = require("net");
 import Http = require("http");
 import Url = require("url");
 import ApiVersions = require("./ApiVersions");
+import Tracker = require("./Tracker");
 
 class Server {
 	
@@ -46,21 +47,29 @@ class Server {
 	
 	private onRequest(msg : Http.IncomingMessage, resp : Http.ServerResponse) {
 		console.log(msg.url);
+		var ip = msg.socket.remoteAddress;
 		var request = Url.parse(msg.url, true);
 		var path = request.pathname.split("/");
-		var api = ApiVersions[path[1]];
-		var endpoint = "_" + path.slice(2).join("_");
+		var apiVersion = path[1];
+		var api = ApiVersions[apiVersion];
+		var endpoint = "/" + path.slice(2).join("/");
+		var endpointMethod = endpoint.replace(/\//g, "_");
+		
+		var tracker = new Tracker();
+		tracker.setIp(ip);
+		tracker.setEndpoint(endpoint);
+		tracker.setApiVersion(apiVersion);
 
 		if (!api) {
 			resp.statusCode = 404;
 			resp.end();
 		} else {
-			var endpointFunction = api[endpoint];
+			var endpointFunction = api[endpointMethod];
 			if (!endpointFunction) {
 				resp.statusCode = 404;
 				resp.end();
 			} else {
-				api[endpoint](request.query, resp);
+				api[endpointMethod](tracker, request.query, resp);
 			}
 		}
 	}
