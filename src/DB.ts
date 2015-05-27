@@ -4,7 +4,7 @@ import MongoDB = require("mongodb");
 
 class DB {
 
-	static url = "mongodb://127.0.0.1:27017/duvidovc";
+	static url = "mongodb://127.0.0.1:60001/duvidovc";
 
 	static connectedCallback : () => void;
 	static db : MongoDB.Db;
