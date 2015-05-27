@@ -19,8 +19,11 @@ module Facebook {
 
 	export function fetchAvatar(id : string, callback : (err : Error, buff : Buffer) => void) {
 		fetchJson(url+"/"+id+"/picture?type=square&width=320&height=320&redirect=0", (obj) => {
-			if (obj.error)
+			if (obj.error) {
+				if (obj.error.type == "OAuthException")
+					obj.error.type = "InvalidIdentifier"; // Won't cause logout
 				callback(new Error(obj.error.type + ": " + obj.error.message), null);
+			}
 			else {
 				fetchBinary(obj.data.url, (buffer) => {
 					callback(null, buffer);
