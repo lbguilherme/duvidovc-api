@@ -5,20 +5,40 @@ import Https = require("https");
 module Facebook {
 	var url = "https://graph.facebook.com/v2.3";
 	
-	export type User = {
+	export interface FacebookError {
+		error : {
+			type : string,
+			message : string
+		}
+	};
+	
+	export interface User extends FacebookError {
 		id : string;
 		name : string;
 	};
 	
-	export type TokenInfo = {
+	export interface TokenInfo extends FacebookError {
 		access_token : string;
 		token_type : string;
 		expires_in : number;
 		auth_type : string;
 	};
+	
+	export interface AvatarInfo extends FacebookError {
+		data : {
+			url : string
+		}
+	};
+	
+	interface Page<T> extends FacebookError {
+		data : T[],
+		paging : {
+			next : string
+		} 
+	}
 
 	export function fetchAvatar(id : string, callback : (err : Error, buff : Buffer) => void) {
-		fetchJson(url+"/"+id+"/picture?type=square&width=320&height=320&redirect=0", (obj) => {
+		fetchJson<AvatarInfo>(url+"/"+id+"/picture?type=square&width=320&height=320&redirect=0", (obj) => {
 			if (obj.error) {
 				if (obj.error.type == "OAuthException")
 					obj.error.type = "InvalidIdentifier"; // Won't cause logout
@@ -37,7 +57,7 @@ module Facebook {
 	}
 
 	export function fetchUser(token : string, id : string, callback : (err : Error, userInfo : Facebook.User) => void) {
-		fetchJson(url+"/"+id+"/?access_token="+token, (obj) => {
+		fetchJson<User>(url+"/"+id+"/?access_token="+token, (obj) => {
 			if (obj.error)
 				callback(new Error(obj.error.type + ": " + obj.error.message), null);
 			else
@@ -49,7 +69,7 @@ module Facebook {
 		var ids : string[] = [];
 		var names : string[] = [];
 
-		function processPage(obj : any) {
+		function processPage(obj : Page<User>) {
 			if (obj.error) {
 				callback(new Error(obj.error.type + ": " + obj.error.message), null, null);
 				return;
@@ -59,16 +79,16 @@ module Facebook {
 				names.push(obj.data[i].name);
 			}
 			if (obj.paging && obj.paging.next)
-				fetchJson(obj.paging.next, processPage);
+				fetchJson<Page<User>>(obj.paging.next, processPage);
 			else
 				callback(null, ids, names);
 		}
 
-		fetchJson(url+"/me/friends/?access_token="+token, processPage);
+		fetchJson<Page<User>>(url+"/me/friends/?access_token="+token, processPage);
 	}
 	
 	export function fetchTokenInfo(token : string, callback : (err : Error, info : TokenInfo) => void) {
-		fetchJson(url+"/oauth/access_token_info?client_id=1497042670584041&access_token="+token, (obj) => {
+		fetchJson<TokenInfo>(url+"/oauth/access_token_info?client_id=1497042670584041&access_token="+token, (obj) => {
 			if (obj.error)
 				callback(new Error(obj.error.type + ": " + obj.error.message), null);
 			else
@@ -76,14 +96,14 @@ module Facebook {
 		});
 	}
 	
-	function fetchJson(url : string, callback : (object : any) => void) {
+	function fetchJson<T>(url : string, callback : (object : T) => void) {
 		Https.get(url, (res) => {
 			var data = "";
 			res.on("data", (chunk : string) => {
 				data += chunk;
 			});
 			res.on("end", () => {
-				callback(JSON.parse(data));
+				callback(<T>JSON.parse(data));
 			});
 		});
 	}
