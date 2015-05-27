@@ -4,6 +4,7 @@ import Http = require("http");
 import ApiBase = require("./ApiBase");
 import Duvido = require("./Duvido");
 import Tracker = require("./Tracker");
+import Utility = require("./Utility");
 
 class ApiV0 extends ApiBase {
 
@@ -59,30 +60,28 @@ class ApiV0 extends ApiBase {
 			user.getFriends((err, friends) => {
 				if (err) {
 					this.fail(tracker, err.message, resp);
-				} else {
-					var friendsList : {id : string, name : string}[] = [];
-					var count = 0;
-					for (var i = 0; i < friends.length; ++i) {(() => {
-						var obj = {id: friends[i].id, name: "?"}
-						friendsList.push(obj);
-						friends[i].getName(token, (err, name) => {
-							if (!err)
-								obj.name = name;
-							else
-								console.log(err);
-							count += 1;
-							if (count == friends.length) {
-								resp.setHeader("Content-Type", "application/json");
-								resp.write(JSON.stringify(friendsList));
-								resp.end();
-								user.getName(token, (err, name) => {
-									tracker.setName(name);
-									tracker.end();
-								});
-							}
-						});
-					})()}
+					return;
 				}
+				var friendsList : {id : string, name : string}[] = [];
+				Utility.doForAll(friends.length, (i, done) => {
+					var obj = {id: friends[i].id, name: "?"}
+					friendsList.push(obj);
+					friends[i].getName(token, (err, name) => {
+						if (!err)
+							obj.name = name;
+						else
+							console.log(err);
+						done();
+					});
+				}, () => {
+					resp.setHeader("Content-Type", "application/json");
+					resp.write(JSON.stringify(friendsList));
+					resp.end();
+					user.getName(token, (err, name) => {
+						tracker.setName(name);
+						tracker.end();
+					});
+				});
 			});
 		});
 	}
