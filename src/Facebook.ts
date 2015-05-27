@@ -18,72 +18,33 @@ module Facebook {
 	};
 
 	export function fetchAvatar(id : string, callback : (err : Error, buff : Buffer) => void) {
-		Https.get(url+"/"+id+"/picture?type=square&width=300&height=300", (res) => {
-			res.on("data", () => {}); // noop, but required. Otherwise 'end' will never be fired.
-			res.on("end", () => {
-				var uri = res.headers.location;
-				if (!uri) {callback(new Error("avatar not found"), null); return;}
-				Https.get(uri, (res) => {
-					res.setEncoding('binary');
-					var data = "";
-					res.on("data", (chunk : string) => {
-						data += chunk;
-					});
-					res.on("end", () => {
-						callback(null, new Buffer(data, "binary"));
-					});
+		fetchJson(url+"/"+id+"/picture?type=square&width=320&height=320&redirect=0", (obj) => {
+			if (obj.error)
+				callback(new Error(obj.error.type + ": " + obj.error.message), null);
+			else {
+				fetchBinary(obj.data.url, (buffer) => {
+					callback(null, buffer);
 				});
-			});
+			}
 		});
 	}
 
 	export function fetchMe(token : string, callback : (err : Error, userInfo : Facebook.User) => void) {
-		Https.get(url+"/me/?access_token="+token, (res) => {
-			var data = "";
-			res.on("data", (chunk : string) => {
-				data += chunk;
-			});
-			res.on("end", () => {
-				var obj = JSON.parse(data);
-				if (obj.error)
-					callback(new Error(obj.error.type + ": " + obj.error.message), null);
-				else
-					callback(null, JSON.parse(data));
-			});
-		});
+		fetchUser(token, "me", callback);
 	}
 
 	export function fetchUser(token : string, id : string, callback : (err : Error, userInfo : Facebook.User) => void) {
-		Https.get(url+"/"+id+"/?access_token="+token, (res) => {
-			var data = "";
-			res.on("data", (chunk : string) => {
-				data += chunk;
-			});
-			res.on("end", () => {
-				var obj = JSON.parse(data);
-				if (obj.error)
-					callback(new Error(obj.error.type + ": " + obj.error.message), null);
-				else
-					callback(null, JSON.parse(data));
-			});
+		fetchJson(url+"/"+id+"/?access_token="+token, (obj) => {
+			if (obj.error)
+				callback(new Error(obj.error.type + ": " + obj.error.message), null);
+			else
+				callback(null, obj);
 		});
 	}
 	
 	export function fetchFriends(token : string, callback : (err : Error, ids : string[], names : string[]) => void) {
 		var ids : string[] = [];
 		var names : string[] = [];
-
-		function requestPage(uri : string) {
-			Https.get(uri, (res) => {
-				var data = "";
-				res.on("data", (chunk : string) => {
-					data += chunk;
-				});
-				res.on("end", () => {
-					processPage(JSON.parse(data));
-				});
-			});
-		}
 
 		function processPage(obj : any) {
 			if (obj.error) {
@@ -95,26 +56,44 @@ module Facebook {
 				names.push(obj.data[i].name);
 			}
 			if (obj.paging && obj.paging.next)
-				requestPage(obj.paging.next);
+				fetchJson(obj.paging.next, processPage);
 			else
 				callback(null, ids, names);
 		}
 
-		requestPage(url+"/me/friends/?access_token="+token);
+		fetchJson(url+"/me/friends/?access_token="+token, processPage);
 	}
 	
 	export function fetchTokenInfo(token : string, callback : (err : Error, info : TokenInfo) => void) {
-		Https.get(url+"/oauth/access_token_info?client_id=1497042670584041&access_token="+token, (res) => {
+		fetchJson(url+"/oauth/access_token_info?client_id=1497042670584041&access_token="+token, (obj) => {
+			if (obj.error)
+				callback(new Error(obj.error.type + ": " + obj.error.message), null);
+			else
+				callback(null, obj);
+		});
+	}
+	
+	function fetchJson(url : string, callback : (object : any) => void) {
+		Https.get(url, (res) => {
 			var data = "";
 			res.on("data", (chunk : string) => {
 				data += chunk;
 			});
 			res.on("end", () => {
-				var obj = JSON.parse(data);
-				if (obj.error)
-					callback(new Error(obj.error.type + ": " + obj.error.message), null);
-				else
-					callback(null, JSON.parse(data));
+				callback(JSON.parse(data));
+			});
+		});
+	}
+	
+	function fetchBinary(url : string, callback : (buffer : Buffer) => void) {
+		Https.get(url, (res) => {
+			res.setEncoding("binary");
+			var data = "";
+			res.on("data", (chunk : string) => {
+				data += chunk;
+			});
+			res.on("end", () => {
+				callback(new Buffer(data, "binary"));
 			});
 		});
 	}
