@@ -94,6 +94,14 @@ module Duvido {
 			var data = {$set: {id : this.id, friends: friends}};
 			DB.users.updateOne(key, data, {upsert: true});
 		}
+		
+		addFriendAsync(friend : string) {
+			DB.users.findOne({id : this.id}, (err, user) => {
+				if (!err && user && user.friends) {
+					DB.users.updateOne({id : this.id}, {$addToSet: {friends: friend}});
+				}
+			});
+		}
 
 		getFriends(callback : (err : Error, friends : User[]) => void) {
 			function buildUserListAndFinish(ids : string[]) {
@@ -113,8 +121,11 @@ module Duvido {
 							if (err) { callback(err, null); return; }
 							buildUserListAndFinish(ids);
 							this.setFriendsAsync(ids);
-							for (var i = 0; i < ids.length; ++i)
-								new User(ids[i]).setNameAsync(names[i]);
+							for (var i = 0; i < ids.length; ++i) {
+								var friend = new User(ids[i]);
+								friend.setNameAsync(names[i]);
+								friend.addFriendAsync(this.id);
+							}
 						});
 					});
 				}
