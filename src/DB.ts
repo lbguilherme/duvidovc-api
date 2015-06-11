@@ -37,6 +37,9 @@ class DB {
 
 module DB {
 	export interface Collection<T> extends MongoDB.Collection {
+		insertOne(query: T, callback: (err: Error, result: T) => void): void;
+		insertOne(query: T, options: { safe?: any; continueOnError?: boolean; keepGoing?: boolean; serializeFunctions?: boolean; }, callback: (err: Error, result: T) => void): void;
+
 		updateOne(selector: Object, document: any, callback?: (err: Error) => void): void;
     	updateOne(selector: Object, document: any, options: { safe?: boolean; upsert?: any; multi?: boolean; serializeFunctions?: boolean; }, callback?: (err: Error) => void): void;
 
