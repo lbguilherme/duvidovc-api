@@ -113,4 +113,60 @@ class ApiV0 extends ApiBase {
 			});
 		});
 	}
+
+	/**
+	 * api/v0/challenge
+	 * - token: The owner token
+	 * - title: The challenge title
+	 * - description: The challenge text
+	 * - reward: The reward text
+	 * - targets: A comma separated list of friend's ids
+	 * - duration: The duration in minutes
+	 * - image: The base64 encoded image
+	 * 
+	 * Returns: JSON
+	 * {
+	 * 	id : string, the id of the created challenge
+	 * }
+	 */
+	_challenge(tracker : Tracker, params : any, resp : Http.ServerResponse) {
+		if (!params.token) {
+			this.fail(tracker, "token must be provided", resp);
+			return;
+		}
+		
+		Duvido.User.fromToken(params.token, (err, user) => {
+			if (err) {
+				this.fail(tracker, err.message, resp);
+				return;
+			}
+			
+			tracker.setUserId(user.id);
+			var info : Duvido.Challenge.CreationInfo = {
+				owner: user.id,
+				title: params.title,
+				description: params.description,
+				reward: params.reward,
+				targets: params.targets.split(","),
+				duration: parseInt(params.duration),
+				image: new Buffer(params.image, "base64")
+			}
+			
+			Duvido.Challenge.create(info, (err, challenge) => {
+				if (err) {
+					this.fail(tracker, err.message, resp);
+					return;
+				}
+				
+				resp.setHeader("Content-Type", "application/json");
+				resp.write(JSON.stringify({id : challenge.id}));
+				resp.end();
+				
+				user.getName(params.token, (err, name) => {
+					tracker.setName(name);
+					tracker.end();
+				});
+			});
+		});
+	}
 }
