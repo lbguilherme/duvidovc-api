@@ -73,6 +73,6 @@ module DB {
 		reward : string
 		targets : string[]
 		duration : number
-		imageId? : string
+		image? : MongoDB.Binary
 	}
 }
