@@ -168,4 +168,28 @@ module Duvido {
 			});
 		}
 	}
+	
+	export module Challenge {
+		export type CreationInfo = {
+			owner : string,
+			title: string,
+			description : string,
+			reward : string,
+			targets : string[],
+			duration : number,
+			image : Buffer
+		};
+	}
+	
+	export class Challenge {
+		id : string;
+
+		constructor(id : string) {
+			this.id = id;
+		}
+		
+		static create(info : Challenge.CreationInfo, callback : (err : Error, challenge : Challenge) => void) {
+			
+		}
+	}
 }
