@@ -66,12 +66,13 @@ module DB {
 	
 	export interface Challenge {
 		creationTime : Date
-		ownerId : string
+		id : string
+		owner : string
 		title : string
-		descr : string
-		award : string
-		targetsId : string[]
+		description : string
+		reward : string
+		targets : string[]
 		duration : number
-		image : MongoDB.Binary
+		imageId? : string
 	}
 }
