@@ -19,19 +19,18 @@ class ApiV0 extends ApiBase {
 	 * }
 	 */
 	_login(tracker : Tracker, params : any, resp : Http.ServerResponse) {
-		var token = params.token;
-		if (!token) {
+		if (!params.token) {
 			this.fail(tracker, "token must be provided", resp);
 			return;
 		}
 		
-		Duvido.User.fromToken(token, (err, user) => {
+		Duvido.User.fromToken(params.token, (err, user) => {
 			if (err) {
 				this.fail(tracker, err.message, resp);
 			} else {
 				tracker.setUserId(user.id);
 				user.setLastLoginAsync();
-				user.getName(token, (err, name) => {
+				user.getName(params.token, (err, name) => {
 					resp.setHeader("Content-Type", "application/json");
 					resp.write(JSON.stringify({id: user.id, name: name}));
 					resp.end();
