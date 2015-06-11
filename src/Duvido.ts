@@ -177,7 +177,7 @@ module Duvido {
 			reward : string,
 			targets : string[],
 			duration : number,
-			image : Buffer
+			image? : Buffer
 		};
 	}
 	
