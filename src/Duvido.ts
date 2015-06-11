@@ -1,10 +1,12 @@
 /// <reference path="../decl/mongodb.d.ts" />
+/// <reference path="../decl/node-uuid.d.ts" />
 
 export = Duvido;
 
 import DB = require("./DB");
 import Facebook = require("./Facebook");
 import MongoDB = require("mongodb");
+import UUID = require("node-uuid");
 
 module Duvido {
 	export class User {
@@ -189,7 +191,21 @@ module Duvido {
 		}
 		
 		static create(info : Challenge.CreationInfo, callback : (err : Error, challenge : Challenge) => void) {
-			
+			var challenge : DB.Challenge = {
+				id: UUID.v4(),
+				creationTime: new Date,
+				owner: info.owner,
+				title: info.title,
+				description: info.description,
+				reward: info.reward,
+				targets: info.targets,
+				duration: info.duration,
+				image: info.image ? new MongoDB.Binary(info.image) : null
+			}
+			DB.challenges.insertOne(challenge, (err) => {
+				if (err) { callback(err, null); return; }
+				callback(null, new Challenge(challenge.id));
+			});
 		}
 	}
 }

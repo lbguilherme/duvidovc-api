@@ -10,6 +10,7 @@ class DB {
 	static db : MongoDB.Db;
 	static users : DB.Collection<DB.User>;
 	static tokens : DB.Collection<DB.Token>;
+	static challenges : DB.Collection<DB.Challenge>;
 
 	static init(callback : () => void) {
 		console.log("Connecting to database at '%s' ...", DB.url);
@@ -30,6 +31,7 @@ class DB {
 		this.db = db;
 		this.users = db.collection("users");
 		this.tokens = db.collection("tokens");
+		this.challenges = db.collection("challenges");
 		this.connectedCallback();
 	}
 
