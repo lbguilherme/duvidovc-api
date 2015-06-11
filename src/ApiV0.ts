@@ -8,6 +8,16 @@ import Utility = require("./Utility");
 
 class ApiV0 extends ApiBase {
 
+	/**
+	 * api/v0/login
+	 * - token: Facebook access token from the user
+	 * 
+	 * Returns: JSON
+	 * {
+	 * 	id : string, the current user's id
+	 *  name : string, the current user's name
+	 * }
+	 */
 	_login(tracker : Tracker, params : any, resp : Http.ServerResponse) {
 		var token = params.token;
 		if (!token) {
@@ -32,6 +42,13 @@ class ApiV0 extends ApiBase {
 		});
 	}
 
+	/**
+	 * api/v0/avatar
+	 * - id: The id of any user
+	 * 
+	 * Returns: BINARY
+	 * JPG encoded avatar image.
+	 */
 	_avatar(tracker : Tracker, params : any, resp : Http.ServerResponse) {
 		var user = new Duvido.User(params.id);
 		tracker.setUserId(user.id);
@@ -50,6 +67,17 @@ class ApiV0 extends ApiBase {
 		});
 	}
 
+	/**
+	 * api/v0/friends
+	 * - id: The id of any user
+	 * 
+	 * Returns: JSON
+	 * An array of the following:
+	 * {
+	 * 	id : string, the id of the friend
+	 *  name : string, his name
+	 * }
+	 */
 	_friends(tracker : Tracker, params : any, resp : Http.ServerResponse) {
 		var user = new Duvido.User(params.id);
 		tracker.setUserId(user.id);
