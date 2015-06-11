@@ -20,6 +20,7 @@ class ApiV0 extends ApiBase {
 				this.fail(tracker, err.message, resp);
 			} else {
 				tracker.setUserId(user.id);
+				user.setLastLoginAsync();
 				user.getName(token, (err, name) => {
 					resp.setHeader("Content-Type", "application/json");
 					resp.write(JSON.stringify({id: user.id, name: name}));

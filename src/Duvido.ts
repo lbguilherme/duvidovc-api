@@ -14,11 +14,11 @@ module Duvido {
 			this.id = id;
 		}
 		
-		setCreationTimeIfNeededAsync() {
+		setFirstLoginIfNeededAsync() {
 			DB.users.findOne({id : this.id}, (err, user) => {
-				if (err) return;
-				if (user && user.creationTime) return;
-				DB.users.updateOne({id : this.id}, {$set: {creationTime: Date.now()}}, {upsert: true});
+				if (err || !user) return;
+				if (user && user.firstLogin) return;
+				DB.users.updateOne({id : this.id}, {$set: {firstLogin: Date.now()}}, {upsert: true});
 			});
 		}
 
@@ -31,7 +31,7 @@ module Duvido {
 				var data = {$set: {token : token, expireTime : Date.now() + tokenInfo.expires_in}};
 				DB.tokens.updateOne(key, data, {upsert: true});
 			});
-			this.setCreationTimeIfNeededAsync();
+			this.setFirstLoginIfNeededAsync();
 		}
 
 		static fromToken(token : string, callback : (err : Error, user : User) => void) {
@@ -60,6 +60,14 @@ module Duvido {
 				} else {
 					callback(new Error("no token available for this user"), null);
 				}
+			});
+		}
+		
+		setLastLoginAsync() {
+			DB.users.findOne({id : this.id}, (err, user) => {
+				if (err) return;
+				if (!user) return;
+				DB.users.updateOne({id : this.id}, {$set: {lastLogin: Date.now()}}, {upsert: true});
 			});
 		}
 

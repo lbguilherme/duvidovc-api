@@ -56,7 +56,8 @@ module DB {
 	};
 	
 	export interface User {
-		creationTime : Date
+		firstLogin : Date
+		lastLogin : Date
 		id : string
 		avatar? : MongoDB.Binary
 		friends? : string[]
