@@ -15,6 +15,8 @@ class ApiBase {
 		resp.setHeader("Content-Type", "text/plain");
 		resp.write("Error: " + message);
 		resp.end();
-		tracker.end();
+		
+		if (tracker)
+			tracker.end();
 	}
 }

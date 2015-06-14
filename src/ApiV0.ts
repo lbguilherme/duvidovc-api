@@ -49,36 +49,41 @@ class ApiV0 extends ApiBase {
 	 * JPG encoded avatar image.
 	 */
 	_avatar(tracker : Tracker, params : {id:string}, resp : Http.ServerResponse) {
+		var user = new Duvido.User(params.id);
+		user.getAvatar((err, buf) => {
+			if (err) {
+				this.fail(null, err.message, resp);
+			} else {
+				resp.setHeader("Content-Type", "image/png");
+				resp.write(buf);
+				resp.end();
+			}
+		});
+	}
+	
+	_avatars(tracker : Tracker, params : {id:string}, resp : Http.ServerResponse) {
 		var ids = params.id.split(",");
 		var avatars : Buffer[] = [];
 		Utility.doForAll(ids.length, (i, done) => {
 			var user = new Duvido.User(ids[i]);
 			user.getAvatar((err, buf) => {
 				if (err) {
-					this.fail(tracker, err.message, resp);
+					this.fail(null, err.message, resp);
 				} else {
 					avatars[i] = buf;
 					done();
 				}
 			});
 		}, () => {
-			if (ids.length == 1) {
-				resp.setHeader("Content-Type", "image/png");
-				resp.write(avatars[0]);
-				resp.end();
-			} else {
-				resp.setHeader("Content-Type", "application/octet-stream");
-				var sizeBuffers : Buffer[] = [];
-				for (var i = 0; i < avatars.length; ++i) {
-					var buf = new Buffer(4);
-					buf.writeUInt32BE(avatars[i].length, 0);
-					resp.write(buf);
-				}
-				for (var i = 0; i < avatars.length; ++i) {
-					resp.write(avatars[i]);
-				}
-				resp.end();
+			resp.setHeader("Content-Type", "application/octet-stream");
+			var sizeBuffers : Buffer[] = [];
+			for (var i = 0; i < avatars.length; ++i) {
+				var buf = new Buffer(4);
+				buf.writeUInt32BE(avatars[i].length, 0);
+				resp.write(buf);
+				resp.write(avatars[i]);
 			}
+			resp.end();
 		});
 	}
 
