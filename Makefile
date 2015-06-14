@@ -7,6 +7,7 @@ watch: $(wildcard *.ts) Makefile
 	@${TSC} --watch --outDir js src/main.ts
 
 run: js/main.js
+	@killall duvidovc-api 2> /dev/null | cat
 	@${NODE} $(NODE_FLAGS) $<
 
 pm2: js/main.js
