@@ -8,7 +8,7 @@ watch: $(wildcard *.ts) Makefile
 
 run: js/main.js
 	@killall duvidovc-api 2> /dev/null | cat
-	@${NODE} $(NODE_FLAGS) $<
+	@${NODE} $(NODE_FLAGS) $< 2>&1 >> log &
 
 pm2: js/main.js
 	@pm2 stop $< 2>&1 | cat > /dev/null
