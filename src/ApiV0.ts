@@ -60,7 +60,16 @@ class ApiV0 extends ApiBase {
 			}
 		});
 	}
-	
+
+	/**
+	 * api/v0/avatars
+	 * - id: A list of comma-separated ids of any users
+	 * 
+	 * Returns: BINARY
+	 * A sequence of the following for each input id:
+	 *   - a 4-byte unsigned integer (big endian) to specify image size in bytes
+	 *   - the avatar image data as JPG
+	 */
 	_avatars(tracker : Tracker, params : {id:string}, resp : Http.ServerResponse) {
 		var ids = params.id.split(",");
 		var avatars : Buffer[] = [];
