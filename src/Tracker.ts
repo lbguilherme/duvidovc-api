@@ -51,7 +51,7 @@ class Tracker {
             }),
             token_auth: "d75d16ff9e650b074f132f1de028ba81",
             cip: this.ip,
-            _id: Crypto.createHash('md5').update(this.userId).digest('hex').substr(0, 16),
+            _id: this.userId ? Crypto.createHash('md5').update(this.userId).digest('hex').substr(0, 16) : null,
             rand: Crypto.randomBytes(16).toString('hex'),
             uid: this.userId + " (" + this.name + ")",
             gt_ms: now.getTime() - this.start,
