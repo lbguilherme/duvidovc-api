@@ -9,7 +9,7 @@ import Utility = require("./Utility");
 class ApiV0 extends ApiBase {
 
 	/**
-	 * api/v0/login
+	 * POST api/v0/login
 	 * - token: Facebook access token from the user
 	 * 
 	 * Returns: JSON
@@ -18,7 +18,7 @@ class ApiV0 extends ApiBase {
 	 *  name : string, the current user's name
 	 * }
 	 */
-	_login(tracker : Tracker, params : any, resp : Http.ServerResponse) {
+	post_login(tracker : Tracker, params : any, resp : Http.ServerResponse) {
 		if (!params.token) {
 			this.fail(tracker, "token must be provided", resp);
 			return;
@@ -42,13 +42,13 @@ class ApiV0 extends ApiBase {
 	}
 
 	/**
-	 * api/v0/avatar
+	 * GET api/v0/avatar
 	 * - id: The id of any user
 	 * 
 	 * Returns: BINARY
 	 * JPG encoded avatar image.
 	 */
-	_avatar(tracker : Tracker, params : {id:string}, resp : Http.ServerResponse) {
+	get_avatar(tracker : Tracker, params : {id:string}, resp : Http.ServerResponse) {
 		var user = new Duvido.User(params.id);
 		user.getAvatar((err, buf) => {
 			if (err) {
@@ -62,7 +62,7 @@ class ApiV0 extends ApiBase {
 	}
 
 	/**
-	 * api/v0/avatars
+	 * GET api/v0/avatars
 	 * - id: A list of comma-separated ids of any users
 	 * 
 	 * Returns: BINARY
@@ -70,7 +70,7 @@ class ApiV0 extends ApiBase {
 	 *   - a 4-byte unsigned integer (big endian) to specify image size in bytes
 	 *   - the avatar image data as JPG
 	 */
-	_avatars(tracker : Tracker, params : {id:string}, resp : Http.ServerResponse) {
+	get_avatars(tracker : Tracker, params : {id:string}, resp : Http.ServerResponse) {
 		var ids = params.id.split(",");
 		var avatars : Buffer[] = [];
 		Utility.doForAll(ids.length, (i, done) => {
@@ -97,7 +97,7 @@ class ApiV0 extends ApiBase {
 	}
 
 	/**
-	 * api/v0/friends
+	 * GET api/v0/friends
 	 * - id: The id of any user
 	 * 
 	 * Returns: JSON
@@ -107,7 +107,7 @@ class ApiV0 extends ApiBase {
 	 *  name : string, his name
 	 * }
 	 */
-	_friends(tracker : Tracker, params : any, resp : Http.ServerResponse) {
+	get_friends(tracker : Tracker, params : any, resp : Http.ServerResponse) {
 		var user = new Duvido.User(params.id);
 		tracker.setUserId(user.id);
 		user.getToken((err, token) => {
@@ -145,7 +145,7 @@ class ApiV0 extends ApiBase {
 	}
 
 	/**
-	 * api/v0/challenge
+	 * PUT api/v0/challenge
 	 * - token: The owner token
 	 * - title: The challenge title
 	 * - description: The challenge text
@@ -159,7 +159,7 @@ class ApiV0 extends ApiBase {
 	 * 	id : string, the id of the created challenge
 	 * }
 	 */
-	_challenge(tracker : Tracker, params : any, resp : Http.ServerResponse) {
+	put_challenge(tracker : Tracker, params : any, resp : Http.ServerResponse) {
 		if (!params.token) {
 			this.fail(tracker, "token must be provided", resp);
 			return;

@@ -52,8 +52,9 @@ class Server {
 		var path = request.pathname.split("/");
 		var apiVersion = path[1];
 		var api = ApiVersions[apiVersion];
+		var method = msg.method.toLowerCase()
 		var endpoint = "/" + path.slice(2).join("/");
-		var endpointMethod = endpoint.replace(/\//g, "_");
+		var endpointMethod = method + endpoint.replace(/\//g, "_");
 		
 		var tracker = new Tracker();
 		tracker.setIp(ip);
