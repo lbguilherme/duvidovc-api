@@ -55,24 +55,37 @@ class Server {
 		var method = msg.method.toLowerCase()
 		var endpoint = "/" + path.slice(2).join("/");
 		var endpointMethod = method + endpoint.replace(/\//g, "_");
+		var query = request.query;
 		
 		var tracker = new Tracker();
 		tracker.setIp(ip);
 		tracker.setEndpoint(endpoint);
 		tracker.setApiVersion(apiVersion);
-
-		if (!api) {
-			resp.statusCode = 404;
-			resp.end();
-		} else {
-			var endpointFunction = api[endpointMethod];
-			if (!endpointFunction) {
+		
+		query.body = "";
+		msg.on("data", (data : string) => {
+			query.body += data;
+			
+			if (query.body.length > 1e6) { // 1MB
+				msg.socket.destroy();
+				resp.statusCode = 413; // Request Entity Too Large
+				resp.end();
+			}
+		});
+		msg.on("end", () => {
+			if (!api) {
 				resp.statusCode = 404;
 				resp.end();
 			} else {
-				api[endpointMethod](tracker, request.query, resp);
+				var endpointFunction = api[endpointMethod];
+				if (!endpointFunction) {
+					resp.statusCode = 404;
+					resp.end();
+				} else {
+					api[endpointMethod](tracker, query, resp);
+				}
 			}
-		}
+		});
 	}
 
 	private onError(err : Error) {
