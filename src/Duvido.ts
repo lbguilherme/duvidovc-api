@@ -208,4 +208,25 @@ module Duvido {
 			});
 		}
 	}
+	
+	export class Upload {
+		id : string;
+
+		constructor(id : string) {
+			this.id = id;
+		}
+		
+		static create(owner : User, data : Buffer, callback : (err : Error, upload : Upload) => void) {
+			var uploadData : DB.Upload = {
+				id: UUID.v4(),
+				time: new Date,
+				owner: owner.id,
+				data: new MongoDB.Binary(data)
+			}
+			DB.uploads.insertOne(uploadData, (err) => {
+				if (err) { callback(err, null); return; }
+				callback(null, new Upload(uploadData.id));
+			});
+		}
+	}
 }

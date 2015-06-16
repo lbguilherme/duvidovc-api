@@ -11,6 +11,7 @@ class DB {
 	static users : DB.Collection<DB.User>;
 	static tokens : DB.Collection<DB.Token>;
 	static challenges : DB.Collection<DB.Challenge>;
+	static uploads : DB.Collection<DB.Upload>;
 
 	static init(callback : () => void) {
 		console.log("Connecting to database at '%s' ...", DB.url);
@@ -32,6 +33,7 @@ class DB {
 		this.users = db.collection("users");
 		this.tokens = db.collection("tokens");
 		this.challenges = db.collection("challenges");
+		this.uploads = db.collection("uploads");
 		this.connectedCallback();
 	}
 
@@ -67,6 +69,13 @@ module DB {
 		avatar? : MongoDB.Binary
 		friends? : string[]
 		name? : string
+	}
+	
+	export interface Upload {
+		time : Date
+		id : string
+		owner : string
+		data : MongoDB.Binary
 	}
 	
 	export interface Challenge {

@@ -147,6 +147,43 @@ class ApiV0 extends ApiBase {
 			});
 		});
 	}
+	
+	/**
+	 * POST api/v0/upload
+	 * - token: The owner token
+	 * post data: The binary data you want to store
+	 * 
+	 * Returns: Plaintext: the upload id
+	 */
+	post_upload(tracker : Tracker, params : any, resp : Http.ServerResponse) {
+		if (!params.token) {
+			this.fail(tracker, "token must be provided", resp);
+			return;
+		}
+		
+		Duvido.User.fromToken(params.token, (err, user) => {
+			if (err) {
+				this.fail(tracker, err.message, resp);
+				return;
+			}
+			
+			Duvido.Upload.create(user, new Buffer(params.body, "binary"), (err, upload) => {
+				if (err) {
+					this.fail(tracker, err.message, resp);
+					return;
+				}
+				
+				resp.setHeader("Content-Type", "text/plain");
+				resp.write(upload.id);
+				resp.end();
+				user.getName(params.token, (err, name) => {
+					tracker.setUserId(user.id);
+					tracker.setName(name);
+					tracker.end();
+				});
+			});
+		});
+	}
 
 	/**
 	 * PUT api/v0/challenge
