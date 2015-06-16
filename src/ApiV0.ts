@@ -72,6 +72,10 @@ class ApiV0 extends ApiBase {
 	 */
 	get_avatars(tracker : Tracker, params : {id:string}, resp : Http.ServerResponse) {
 		var ids = params.id.split(",");
+		if (ids.length > 100) {
+			this.fail(tracker, "too many avatars", resp);
+			return;
+		}
 		var avatars : Buffer[] = [];
 		Utility.doForAll(ids.length, (i, done) => {
 			var user = new Duvido.User(ids[i]);
