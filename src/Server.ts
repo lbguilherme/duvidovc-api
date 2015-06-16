@@ -66,7 +66,7 @@ class Server {
 		msg.on("data", (data : string) => {
 			query.body += data;
 			
-			if (query.body.length > 1e6) { // 1MB
+			if (query.body.length > 1e7) { // 10MB
 				msg.socket.destroy();
 				resp.statusCode = 413; // Request Entity Too Large
 				resp.end();
