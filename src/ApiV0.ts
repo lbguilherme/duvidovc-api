@@ -186,21 +186,18 @@ class ApiV0 extends ApiBase {
 	}
 
 	/**
-	 * PUT api/v0/challenge
+	 * POST api/v0/challenge
 	 * - token: The owner token
 	 * - title: The challenge title
 	 * - description: The challenge text
 	 * - reward: The reward text
 	 * - targets: A comma separated list of friend's ids
 	 * - duration: The duration in minutes
-	 * - image: The base64 encoded image
+	 * - image: The upload id of the image, optional
 	 * 
-	 * Returns: JSON
-	 * {
-	 * 	id : string, the id of the created challenge
-	 * }
+	 * Returns: Nothing
 	 */
-	put_challenge(tracker : Tracker, params : any, resp : Http.ServerResponse) {
+	post_challenge(tracker : Tracker, params : any, resp : Http.ServerResponse) {
 		if (!params.token) {
 			this.fail(tracker, "token must be provided", resp);
 			return;
@@ -212,7 +209,6 @@ class ApiV0 extends ApiBase {
 				return;
 			}
 			
-			tracker.setUserId(user.id);
 			var info : Duvido.Challenge.CreationInfo = {
 				owner: user.id,
 				title: params.title,
@@ -220,7 +216,7 @@ class ApiV0 extends ApiBase {
 				reward: params.reward,
 				targets: params.targets.split(","),
 				duration: parseInt(params.duration),
-				image: new Buffer(params.image, "base64")
+				image: params.image ? new Duvido.Upload(params.image) : null
 			}
 			
 			Duvido.Challenge.create(info, (err, challenge) => {
@@ -229,11 +225,9 @@ class ApiV0 extends ApiBase {
 					return;
 				}
 				
-				resp.setHeader("Content-Type", "application/json");
-				resp.write(JSON.stringify({id : challenge.id}));
 				resp.end();
-				
 				user.getName(params.token, (err, name) => {
+					tracker.setUserId(user.id);
 					tracker.setName(name);
 					tracker.end();
 				});

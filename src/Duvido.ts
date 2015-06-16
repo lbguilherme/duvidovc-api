@@ -179,7 +179,7 @@ module Duvido {
 			reward : string,
 			targets : string[],
 			duration : number,
-			image? : Buffer
+			image? : Duvido.Upload
 		};
 	}
 	
@@ -199,13 +199,28 @@ module Duvido {
 				description: info.description,
 				reward: info.reward,
 				targets: info.targets,
-				duration: info.duration,
-				image: info.image ? new MongoDB.Binary(info.image) : null
+				duration: info.duration
 			}
-			DB.challenges.insertOne(challenge, (err) => {
-				if (err) { callback(err, null); return; }
-				callback(null, new Challenge(challenge.id));
-			});
+			
+			function finish() {
+				DB.challenges.insertOne(challenge, (err) => {
+					if (err) { callback(err, null); return; }
+					callback(null, new Challenge(challenge.id));
+				});
+			}
+			
+			if (info.image) {
+				info.image.getData((err, owner, data) => {
+					if (err) { callback(err, null); return; }
+					if (!data || owner.id != info.owner) { callback(new Error("Invalid id"), null); return; }
+					if (data)
+						challenge.image = data;
+					
+					finish();
+				});
+			} else {
+				finish();
+			}
 		}
 	}
 	
@@ -226,6 +241,17 @@ module Duvido {
 			DB.uploads.insertOne(uploadData, (err) => {
 				if (err) { callback(err, null); return; }
 				callback(null, new Upload(uploadData.id));
+			});
+		}
+		
+		getData(callback : (err : Error, owner : User, data : MongoDB.Binary) => void) {
+			DB.uploads.findOne({id : this.id}, {_id: 0, owner: 1, data: 1}, (err, upload) => {
+				if (err) { callback(err, null, null); return; }
+				if (upload) {
+					callback(null, new User(upload.owner), upload.data);
+				} else {
+					callback(null, null, null);
+				}
 			});
 		}
 	}
