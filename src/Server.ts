@@ -68,7 +68,7 @@ class Server {
 		});
 		
 		msg.on("end", () => {
-			if (msg.headers["Content-Length"] !== query.body.length) {
+			if (msg.headers["Content-Length"] && msg.headers["Content-Length"] !== query.body.length) {
 				resp.statusCode = 400;
 				resp.end();
 				return;
