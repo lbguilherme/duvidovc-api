@@ -68,6 +68,12 @@ class Server {
 		});
 		
 		msg.on("end", () => {
+			if (msg.headers["Content-Length"] !== query.body.length) {
+				resp.statusCode = 400;
+				resp.end();
+				return;
+			}
+			
 			if (!api) {
 				resp.statusCode = 404;
 				resp.end();
