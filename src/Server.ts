@@ -67,12 +67,14 @@ class Server {
 		msg.on("data", (data : string) => {
 			query.body += data;
 			
+			/*
 			if (query.body.length > 5e7) { // 50MB
 				failed = true;
 				msg.socket.destroy();
 				resp.statusCode = 413; // Request Entity Too Large
 				resp.end();
 			}
+			*/
 		});
 		msg.on("end", () => {
 			if (failed) return;
