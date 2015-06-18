@@ -62,17 +62,20 @@ class Server {
 		tracker.setEndpoint(endpoint);
 		tracker.setApiVersion(apiVersion);
 		
+		var failed = false;
 		query.body = "";
 		msg.on("data", (data : string) => {
 			query.body += data;
 			
-			if (query.body.length > 1e7) { // 10MB
+			if (query.body.length > 5e7) { // 50MB
+				failed = true;
 				msg.socket.destroy();
 				resp.statusCode = 413; // Request Entity Too Large
 				resp.end();
 			}
 		});
 		msg.on("end", () => {
+			if (failed) return;
 			if (!api) {
 				resp.statusCode = 404;
 				resp.end();
