@@ -192,7 +192,7 @@ module Duvido {
 		
 		static create(info : Challenge.CreationInfo, callback : (err : Error, challenge : Challenge) => void) {
 			var challenge : DB.Challenge = {
-				id: UUID.v4(),
+				id: UUID.v4().replace("-", ""),
 				creationTime: new Date,
 				owner: info.owner,
 				title: info.title,
@@ -233,7 +233,7 @@ module Duvido {
 		
 		static create(owner : User, data : Buffer, callback : (err : Error, upload : Upload) => void) {
 			var uploadData : DB.Upload = {
-				id: UUID.v4(),
+				id: UUID.v4().replace("-", ""),
 				time: new Date,
 				owner: owner.id,
 				data: new MongoDB.Binary(data)
