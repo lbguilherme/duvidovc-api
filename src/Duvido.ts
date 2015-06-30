@@ -5,6 +5,7 @@ export = Duvido;
 
 import DB = require("./DB");
 import Facebook = require("./Facebook");
+import Utility = require("./Utility");
 import MongoDB = require("mongodb");
 import UUID = require("node-uuid");
 
