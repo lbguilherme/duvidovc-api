@@ -53,6 +53,17 @@ module Duvido {
 				}
 			});
 		}
+		
+		checkExists(callback : (err : Error, exists : boolean) => void) {
+			DB.users.findOne({id : this.id}, {_id: 1}, (err, user) => {
+				if (err) { callback(err, null); return; }
+				if (user) {
+					callback(null, true);
+				} else {
+					callback(null, false);
+				}
+			});
+		}
 
 		getToken(callback : (err : Error, token : string) => void) {
 			DB.tokens.findOne({userId : this.id}, (err, tokenInfo) => {
@@ -245,6 +256,17 @@ module Duvido {
 			DB.uploads.insertOne(uploadData, (err) => {
 				if (err) { callback(err, null); return; }
 				callback(null, new Upload(uploadData.id));
+			});
+		}
+		
+		checkExists(callback : (err : Error, exists : boolean) => void) {
+			DB.uploads.findOne({id : this.id}, {_id: 1}, (err, upload) => {
+				if (err) { callback(err, null); return; }
+				if (upload) {
+					callback(null, true);
+				} else {
+					callback(null, false);
+				}
 			});
 		}
 		
