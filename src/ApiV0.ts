@@ -102,7 +102,7 @@ class ApiV0 extends ApiBase {
 
 	/**
 	 * GET api/v0/friends
-	 * - id: The id of any user
+	 * - token: user token
 	 * 
 	 * Returns: JSON
 	 * An array of the following:
@@ -112,39 +112,43 @@ class ApiV0 extends ApiBase {
 	 * }
 	 */
 	get_friends(tracker : Tracker, params : any, resp : Http.ServerResponse) {
-		var user = new Duvido.User(params.id);
-		tracker.setUserId(user.id);
-		user.getToken((err, token) => {
+		if (!params.token) {
+			this.fail(tracker, "token must be provided", resp);
+			return;
+		}
+		
+		Duvido.User.fromToken(params.token, (err, user) => {
 			if (err) {
 				this.fail(tracker, err.message, resp);
-				return;
-			}
-			user.getFriends((err, friends) => {
-				if (err) {
-					this.fail(tracker, err.message, resp);
-					return;
-				}
-				var friendsList : {id : string, name : string}[] = [];
-				Utility.doForAll(friends.length, (i, done) => {
-					var obj = {id: friends[i].id, name: "?"}
-					friendsList.push(obj);
-					friends[i].getName(token, (err, name) => {
-						if (!err)
-							obj.name = name;
-						else
-							console.log(err);
-						done();
-					});
-				}, () => {
-					resp.setHeader("Content-Type", "application/json");
-					resp.write(JSON.stringify(friendsList));
-					resp.end();
-					user.getName(token, (err, name) => {
-						tracker.setName(name);
-						tracker.end();
+			} else {
+				tracker.setUserId(user.id);
+				user.getFriends((err, friends) => {
+					if (err) {
+						this.fail(tracker, err.message, resp);
+						return;
+					}
+					var friendsList : {id : string, name : string}[] = [];
+					Utility.doForAll(friends.length, (i, done) => {
+						var obj = {id: friends[i].id, name: "?"}
+						friendsList.push(obj);
+						friends[i].getName(params.token, (err, name) => {
+							if (!err)
+								obj.name = name;
+							else
+								console.log(err);
+							done();
+						});
+					}, () => {
+						resp.setHeader("Content-Type", "application/json");
+						resp.write(JSON.stringify(friendsList));
+						resp.end();
+						user.getName(params.token, (err, name) => {
+							tracker.setName(name);
+							tracker.end();
+						});
 					});
 				});
-			});
+			}
 		});
 	}
 	
