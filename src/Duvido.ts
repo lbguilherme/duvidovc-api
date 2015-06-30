@@ -198,7 +198,11 @@ module Duvido {
 				title: info.title,
 				description: info.description,
 				reward: info.reward,
-				targets: info.targets,
+				targets: info.targets.map(id => {return {
+					id: id,
+					status: "sent",
+					submissions: []
+				};}),
 				duration: info.duration
 			}
 			
