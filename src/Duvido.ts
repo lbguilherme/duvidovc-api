@@ -201,7 +201,7 @@ module Duvido {
 			this.id = id;
 		}
 		
-		static create(info : Challenge.CreationInfo, callback : (err : Error, challenge : Challenge) => void) {
+		static create(info : Challenge.CreationInfo, callback : (err : Error, id : string) => void) {
 			var challenge : DB.Challenge = {
 				id: UUID.v4().replace(/-/g, ""),
 				creationTime: new Date,
@@ -220,21 +220,44 @@ module Duvido {
 			function finish() {
 				DB.challenges.insertOne(challenge, (err) => {
 					if (err) { callback(err, null); return; }
-					callback(null, new Challenge(challenge.id));
+					callback(null, challenge.id);
 				});
 			}
 			
-			if (info.image) {
-				info.image.getData((err, owner, data) => {
+			function checkChallengeAndTargets() {
+				info.image.checkExists((err, exists) => {
 					if (err) { callback(err, null); return; }
-					if (!data || owner.id != info.owner) { callback(new Error("Invalid id"), null); return; }
-					if (data)
-						challenge.image = data;
-					
-					finish();
+					if (!exists) { callback(new Error("Challenge image does not exist"), null); return; }
+					checkTargets();
 				});
+			}
+			
+			function checkTargets() {
+				var valid = true;
+				Utility.doForAll(info.targets.length, (i, done) => {
+					var id = info.targets[i];
+					new User(id).checkExists((err, exists) => {
+						if (err) { callback(err, null); return; }
+						if (!exists) valid = false;
+						done();
+					});
+				}, () => {
+					if (valid) {
+						finish();
+					} else {
+						callback(new Error("One of the target ids does not exist"), null);
+					}
+				});
+				
+			}
+			
+			if (info.image) {
+				challenge.image = info.image.id;
+				checkChallengeAndTargets();
 			} else {
-				finish();
+				checkTargets();
+			}
+		}
 			}
 		}
 	}
