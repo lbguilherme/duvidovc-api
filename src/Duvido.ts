@@ -197,7 +197,8 @@ module Duvido {
 	
 	export class Challenge {
 		id : string;
-
+		data : DB.Challenge;
+		
 		constructor(id : string) {
 			this.id = id;
 		}
@@ -259,6 +260,16 @@ module Duvido {
 				checkTargets();
 			}
 		}
+		
+		getData(callback : (err : Error, data : DB.Challenge) => void) {
+			if (this.data)
+				callback(null, this.data);
+			else {
+				DB.challenges.findOne({id: this.id}, {_id: 0}, (err, data) => {
+					if (err) { callback(err, null); return; }
+					if (!data) { callback(new Error, null); return; }
+					callback(null, this.data = data);
+				});
 			}
 		}
 	}
@@ -290,6 +301,17 @@ module Duvido {
 					callback(null, true);
 				} else {
 					callback(null, false);
+				}
+			});
+		}
+		
+		getOwner(callback : (err : Error, owner : User) => void) {
+			DB.uploads.findOne({id : this.id}, {_id: 0, owner: 1}, (err, upload) => {
+				if (err) { callback(err, null); return; }
+				if (upload) {
+					callback(null, new User(upload.owner));
+				} else {
+					callback(null, null);
 				}
 			});
 		}
