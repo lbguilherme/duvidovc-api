@@ -261,6 +261,20 @@ module Duvido {
 			}
 		}
 		
+		static listFromOwner(owner : string, callback : (err : Error, list : Challenge[]) => void) {
+			DB.challenges.find({owner: owner}, {_id: 0}, (err, result) => {
+				if (err) { callback(err, null); return; }
+				result.toArray((err, array) => {
+					if (err) { callback(err, null); return; }
+					callback(null, array.map(data => {
+						var challenge = new Challenge(data.id);
+						challenge.data = data
+						return challenge;
+					}));
+				});
+			});
+		}
+		
 		getData(callback : (err : Error, data : DB.Challenge) => void) {
 			if (this.data)
 				callback(null, this.data);
