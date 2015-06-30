@@ -9,7 +9,7 @@ process.title = "duvidovc-api"
 DB.init(() => {
 
 	var server = new Server();
-	server.start(50001, "localhost");
+	server.start(80, "0.0.0.0");
 
 	process.on("SIGINT", () => {
 		console.log("\rRequested to shutdown.");
