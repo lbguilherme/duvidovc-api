@@ -85,8 +85,18 @@ module DB {
 		title : string
 		description : string
 		reward : string
-		targets : string[]
 		duration : number
-		image? : MongoDB.Binary
+		image? : string
+		targets : {
+			id : string
+			status : string // "sent" | "received" | "read" | "submitted" | "rewarded"
+			submissions : {
+				status : string // "waiting" | "accepted" | "rejected"
+				text : string
+				image : string
+				sentTime : Date
+				judgedTime : Date
+			}[]
+		}[]
 	}
 }
