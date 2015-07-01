@@ -54,7 +54,7 @@ class ApiV0 extends ApiBase {
 			if (err) {
 				this.fail(null, err.message, resp);
 			} else {
-				resp.setHeader("Content-Type", "image/png");
+				resp.setHeader("Content-Type", "image/jpg");
 				resp.write(buf);
 				resp.end();
 			}
