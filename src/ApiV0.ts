@@ -238,4 +238,95 @@ class ApiV0 extends ApiBase {
 			});
 		});
 	}
+	
+	/**
+	 * GET api/v0/challenges
+	 * - token: user token
+	 * 
+	 * Returns: The "info" variable
+	 */
+	get_challenges(tracker : Tracker, params : any, resp : Http.ServerResponse) {
+		var infos : {
+			id : string
+			title : string
+			description : string
+			reward : string
+			duration : number
+			image : string
+			targets : {
+				id : string
+				name : string
+				status : string // "sent" | "received" | "read" | "submitted" | "rewarded"
+				submissions : {
+					status : string // "waiting" | "accepted" | "rejected"
+					text : string
+					image : string
+					sentTime : Date
+					judgedTime : Date
+				}[]
+			}[]
+		}[] = [];
+		
+		if (!params.token) {
+			this.fail(tracker, "token must be provided", resp);
+			return;
+		}
+		
+		Duvido.User.fromToken(params.token, (err, user) => {
+			if (err) {
+				this.fail(tracker, err.message, resp);
+				return;
+			}
+			
+			Duvido.Challenge.listFromOwner(user.id, (err, list) => {
+				// Collect all ids
+				var ids : string[] = [];
+				for (var i = 0; list.length; ++i) {
+					var targets = list[i].data.targets;
+					for (var j = 0; targets.length; ++j) {
+						var id = targets[i].id;
+						if (ids.indexOf(id) != -1)
+							ids.push(id);
+					}
+				}
+				
+				// Fetch the name of each id
+				var names : {[id : string] : string} = {}
+				Utility.doForAll(ids.length, (i, done) => {
+					var id = ids[i];
+					new Duvido.User(id).getName(params.token, (err, name) => {
+						if (err) { this.fail(tracker, err.message, resp); return; }
+						names[id] = name;
+						done();
+					});
+				}, () => {
+					// Add all challenges to the final reply list
+					for (var i = 0; list.length; ++i) {
+						var c = list[i].data;
+						infos.push({
+							id: c.id,
+							title: c.title,
+							description: c.description,
+							reward: c.reward,
+							duration: c.duration,
+							image: c.image,
+							targets: c.targets.map(target => {return {
+								id: target.id,
+								name: names[target.id],
+								status: target.status,
+								submissions: target.submissions
+							};})
+						});
+					}
+					resp.setHeader("Content-Type", "application/json");
+					resp.write(JSON.stringify(infos));
+					resp.end();
+					user.getName(params.token, (err, name) => {
+						tracker.setName(name);
+						tracker.end();
+					});
+				});
+			});
+		});
+	}
 }
