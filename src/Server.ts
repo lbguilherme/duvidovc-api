@@ -5,8 +5,8 @@ export = Server;
 import Net = require("net");
 import Http = require("http");
 import Url = require("url");
-import ApiVersions = require("./ApiVersions");
-import Tracker = require("./Tracker");
+import ApiVersions = require("ApiVersions");
+import Tracker = require("Tracker");
 
 class Server {
 	
