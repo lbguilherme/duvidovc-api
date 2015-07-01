@@ -1,7 +1,7 @@
-export = ApiBase;
+export { ApiBase };
 
-import Http = require("http");
-import Tracker = require("Tracker");
+import * as Http from "http";
+import { Tracker } from "./Tracker";
 
 class ApiBase {
 	[endpoint: string]: (tracker : Tracker, params : any, resp : Http.ServerResponse) => void;

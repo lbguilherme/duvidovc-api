@@ -1,12 +1,12 @@
 /// <reference path="../decl/mongodb.d.ts" />
 /// <reference path="../decl/node-uuid.d.ts" />
 
-export = Upload;
+export { Upload };
 
-import DB = require("DB");
-import MongoDB = require("mongodb");
-import UUID = require("node-uuid");
-import User = require("DuvidoUser");
+import * as MongoDB from "mongodb";
+import { DB } from "DB";
+import { User } from "DuvidoUser";
+import UUID from "node-uuid";
 
 class Upload {
 	id : string;

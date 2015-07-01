@@ -1,10 +1,10 @@
-export = ApiV0;
+export { ApiV0 };
 
-import Http = require("http");
-import ApiBase = require("ApiBase");
-import Duvido = require("Duvido");
-import Tracker = require("Tracker");
-import Utility = require("Utility");
+import * as Http from "http";
+import * as Duvido from "Duvido";
+import * as Utility from "Utility";
+import { ApiBase } from "ApiBase";
+import { Tracker } from "./Tracker";
 
 class ApiV0 extends ApiBase {
 

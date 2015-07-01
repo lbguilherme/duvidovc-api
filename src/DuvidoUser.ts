@@ -1,11 +1,11 @@
 /// <reference path="../decl/mongodb.d.ts" />
 /// <reference path="../decl/node.d.ts" />
 
-export = User;
+export { User }
 
-import DB = require("./DB");
-import Facebook = require("./Facebook");
-import MongoDB = require("mongodb");
+import * as MongoDB from "mongodb";
+import { DB } from "DB";
+import { Facebook } from "Facebook";
 
 class User {
 	id : string;

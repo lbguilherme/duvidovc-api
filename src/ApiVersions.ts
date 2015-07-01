@@ -1,7 +1,7 @@
-export = new ApiVersions();
+export default new ApiVersions();
 
-import ApiBase = require("ApiBase");
-import ApiV0 = require("ApiV0");
+import { ApiBase } from "ApiBase";
+import { ApiV0 } from "ApiV0";
 
 class ApiVersions {
 	[version: string]: ApiBase;

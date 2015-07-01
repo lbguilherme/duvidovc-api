@@ -1,26 +1,14 @@
 /// <reference path="../decl/mongodb.d.ts" />
 /// <reference path="../decl/node-uuid.d.ts" />
 
-export = Challenge;
+export { Challenge };
 
-import DB = require("DB");
-import Utility = require("Utility");
-import MongoDB = require("mongodb");
-import UUID = require("node-uuid");
-import User = require("DuvidoUser");
-import Upload = require("DuvidoUpload");
-
-module Challenge {
-	export type CreationInfo = {
-		owner : string,
-		title: string,
-		description : string,
-		reward : string,
-		targets : string[],
-		duration : number,
-		image? : Upload
-	};
-}
+import * as Utility from "Utility";
+import * as MongoDB from "mongodb";
+import { DB } from "DB";
+import { User } from "DuvidoUser";
+import { Upload } from "DuvidoUpload";
+import UUID from "node-uuid";
 
 class Challenge {
 	id : string;
@@ -113,4 +101,16 @@ class Challenge {
 			});
 		}
 	}
+}	
+
+module Challenge {
+	export interface CreationInfo {
+		owner : string;
+		title: string;
+		description : string;
+		reward : string;
+		targets : string[];
+		duration : number;
+		image? : Upload;
+	};
 }

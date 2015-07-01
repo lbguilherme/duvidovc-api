@@ -1,6 +1,6 @@
-export = DB;
+export { DB };
 
-import MongoDB = require("mongodb");
+import * as MongoDB from "mongodb";
 
 class DB {
 

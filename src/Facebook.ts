@@ -1,6 +1,6 @@
-export = Facebook;
+export { Facebook };
 
-import Https = require("https");
+import * as Https from "https";
 
 module Facebook {
 	var url = "https://graph.facebook.com/v2.3";

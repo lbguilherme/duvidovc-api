@@ -1,7 +1,7 @@
 
 declare module "piwik-tracker" {
 	
-	export = PiwikTracker;
+	export default PiwikTracker;
 	
 	// refer to http://developer.piwik.org/api-reference/tracking-api
 	interface PiwikTrackOptions {
