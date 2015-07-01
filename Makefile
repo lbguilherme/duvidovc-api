@@ -1,7 +1,7 @@
 
-TSC := tsc --target ES6 --noImplicitAny --noEmitOnError --sourceMap
+TSC := tsc --target ES5 --noImplicitAny --noEmitOnError --module commonjs --sourceMap
 NODE := node
-NODE_FLAGS := --expose-gc --harmony
+NODE_FLAGS := --expose-gc
 
 js/main.js: $(wildcard src/*.ts) Makefile
 	@${TSC} --outDir js src/main.ts

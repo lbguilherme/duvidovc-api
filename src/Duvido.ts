@@ -1,4 +1,4 @@
 
-export { User } from "DuvidoUser";
-export { Upload } from "DuvidoUpload";
-export { Challenge } from "DuvidoChallenge";
+export import User = require("DuvidoUser");
+export import Upload = require("DuvidoUpload");
+export import Challenge = require("DuvidoChallenge");

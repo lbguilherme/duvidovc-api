@@ -58,5 +58,5 @@ interface UUID {
 
 declare module "node-uuid" {
     var uuid: UUID;
-    export default uuid;
+    export = uuid;
 }

@@ -1,8 +1,8 @@
 /// <reference path="../decl/source-map-support.d.ts" />
 require("newrelic");
-import * as SourceMapSupport from "source-map-support"; SourceMapSupport.install();
-import { Server } from "Server";
-import { DB } from "DB";
+import SourceMapSupport = require("source-map-support"); SourceMapSupport.install();
+import Server = require("Server");
+import DB = require("DB");
 
 process.title = "duvidovc-api"
 

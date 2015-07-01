@@ -1,11 +1,11 @@
 /// <reference path="../decl/node.d.ts" />
 /// <reference path="../decl/piwik-tracker.d.ts" />
 
-export { Tracker };
+export = Tracker;
 
-import * as Http from "http";
-import * as Crypto from "crypto";
-import PiwikTracker from "piwik-tracker";
+import PiwikTracker = require("piwik-tracker");
+import Http = require("http");
+import Crypto = require("crypto");
 
 var piwik = new PiwikTracker(2, "http://piwik.duvido.vc/piwik.php");
 

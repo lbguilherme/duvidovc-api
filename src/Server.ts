@@ -1,12 +1,12 @@
 /// <reference path="../decl/node.d.ts" />
 
-export { Server };
+export = Server;
 
-import * as Net from "net";
-import * as Http from "http";
-import * as Url from "url";
-import { Tracker } from "Tracker";
-import ApiVersions from "ApiVersions";
+import Net = require("net");
+import Http = require("http");
+import Url = require("url");
+import ApiVersions = require("ApiVersions");
+import Tracker = require("Tracker");
 
 class Server {
 	
