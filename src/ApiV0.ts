@@ -71,7 +71,6 @@ class ApiV0 extends ApiBase {
 		}));
 		
 		resp.setHeader("Content-Type", "application/octet-stream");
-		var sizeBuffers : Buffer[] = [];
 		for (var i = 0; i < avatars.length; ++i) {
 			var buf = new Buffer(4);
 			buf.writeUInt32BE(avatars[i].length, 0);
