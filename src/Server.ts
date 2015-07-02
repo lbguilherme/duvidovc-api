@@ -95,6 +95,7 @@ class Server {
 						}
 						
 						resp.end();
+						tracker.setStatus(resp.statusCode);
 						tracker.end();
 					}
 				}
