@@ -3,7 +3,6 @@ export = ApiV0;
 import ApiBase = require("./ApiBase");
 import Duvido = require("./Duvido");
 import Tracker = require("./Tracker");
-import Utility = require("./Utility");
 import Http = require("http");
 import await = require("asyncawait/await");
 import async = require("asyncawait/async");
