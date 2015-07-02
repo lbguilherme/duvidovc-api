@@ -1,7 +1,8 @@
 /// <reference path="../decl/bluebird.d.ts" />
 
-import * as Http from "http";
-import { Promise } from "bluebird";
+import Http = require("http");
+import Bluebird = require("bluebird");
+import await = require("asyncawait/await");
 
 export function doForAll(times : number, action : (i : number, done : () => void) => void, allDone : () => void) {
 	var dones = 0;
@@ -15,7 +16,7 @@ export function doForAll(times : number, action : (i : number, done : () => void
 }
 
 export function readAll(msg : Http.IncomingMessage) {
-	return new Promise((resolve : (result: string) => void, reject : (error: Error) => void) => {
+	return await(new Bluebird.Promise((resolve) => {
 		var contents = "";
 		msg.on("data", (data : string) => {
 			contents += data;
@@ -23,5 +24,5 @@ export function readAll(msg : Http.IncomingMessage) {
 		msg.on("end", () => {
 			resolve(contents);
 		});
-	});
+	}));
 }

@@ -1,6 +1,8 @@
 export = Facebook;
 
 import Https = require("https");
+import await = require("asyncawait/await");
+import Bluebird = require("bluebird");
 
 module Facebook {
 	var url = "https://graph.facebook.com/v2.3";
@@ -37,87 +39,83 @@ module Facebook {
 		} 
 	}
 
-	export function fetchAvatar(id : string, callback : (err : Error, buff : Buffer) => void) {
-		fetchJson<AvatarInfo>(url+"/"+id+"/picture?type=square&width=320&height=320&redirect=0", (obj) => {
-			if (obj.error) {
-				if (obj.error.type == "OAuthException")
-					obj.error.type = "InvalidIdentifier"; // Won't cause logout
-				callback(new Error(obj.error.type + ": " + obj.error.message), null);
-			}
-			else {
-				fetchBinary(obj.data.url, (buffer) => {
-					callback(null, buffer);
-				});
-			}
-		});
-	}
-
-	export function fetchMe(token : string, callback : (err : Error, userInfo : Facebook.User) => void) {
-		fetchUser(token, "me", callback);
-	}
-
-	export function fetchUser(token : string, id : string, callback : (err : Error, userInfo : Facebook.User) => void) {
-		fetchJson<User>(url+"/"+id+"/?access_token="+token, (obj) => {
-			if (obj.error)
-				callback(new Error(obj.error.type + ": " + obj.error.message), null);
-			else
-				callback(null, obj);
-		});
-	}
-	
-	export function fetchFriends(token : string, callback : (err : Error, ids : string[], names : string[]) => void) {
-		var ids : string[] = [];
-		var names : string[] = [];
-
-		function processPage(obj : Page<User>) {
-			if (obj.error) {
-				callback(new Error(obj.error.type + ": " + obj.error.message), null, null);
-				return;
-			}
-			for (var i = 0; i < obj.data.length; ++i) {
-				ids.push(obj.data[i].id);
-				names.push(obj.data[i].name);
-			}
-			if (obj.paging && obj.paging.next)
-				fetchJson<Page<User>>(obj.paging.next, processPage);
-			else
-				callback(null, ids, names);
+	export function getAvatar(id : string) {
+		var info = fetchJson<AvatarInfo>(url+"/"+id+"/picture?type=square&width=320&height=320&redirect=0");
+		
+		if (info.error) {
+			if (info.error.type == "OAuthException")
+				info.error.type = "InvalidIdentifier"; // Won't cause logout
+				
+			throw new Error(info.error.type + ": " + info.error.message);
 		}
+		else {
+			return fetchBinary(info.data.url);
+		}
+	}
 
-		fetchJson<Page<User>>(url+"/me/friends/?access_token="+token, processPage);
+	export function getMe(token : string) {
+		return getUser(token, "me");
+	}
+
+	export function getUser(token : string, id : string) {
+		var user = fetchJson<User>(url+"/"+id+"/?access_token="+token);
+		
+		if (user.error)
+			throw new Error(user.error.type + ": " + user.error.message);
+		else
+			return user;
 	}
 	
-	export function fetchTokenInfo(token : string, callback : (err : Error, info : TokenInfo) => void) {
-		fetchJson<TokenInfo>(url+"/oauth/access_token_info?client_id=1497042670584041&access_token="+token, (obj) => {
-			if (obj.error)
-				callback(new Error(obj.error.type + ": " + obj.error.message), null);
+	export function getFriends(token : string) {
+		var result : {id : string, name : string}[] = [];
+		var page = fetchJson<Page<User>>(url+"/me/friends/?access_token="+token);
+		
+		while (true) {
+			for (var i = 0; i < page.data.length; ++i) {
+				result.push({id: page.data[i].id, name: page.data[i].name});
+			}
+			
+			if (page.paging && page.paging.next)
+				page = fetchJson<Page<User>>(page.paging.next);
 			else
-				callback(null, obj);
-		});
+				return result;
+		}
 	}
 	
-	function fetchJson<T>(url : string, callback : (object : T) => void) {
-		Https.get(url, (res) => {
-			var data = "";
-			res.on("data", (chunk : string) => {
-				data += chunk;
-			});
-			res.on("end", () => {
-				callback(<T>JSON.parse(data));
-			});
-		});
+	export function getTokenInfo(token : string) {
+		var tokenInfo = fetchJson<TokenInfo>(url+"/oauth/access_token_info?client_id=1497042670584041&access_token="+token);
+		
+		if (tokenInfo.error)
+			throw new Error(tokenInfo.error.type + ": " + tokenInfo.error.message);
+		else
+			return tokenInfo;
 	}
 	
-	function fetchBinary(url : string, callback : (buffer : Buffer) => void) {
-		Https.get(url, (res) => {
-			res.setEncoding("binary");
-			var data = "";
-			res.on("data", (chunk : string) => {
-				data += chunk;
+	function fetchJson<T>(url : string) {
+		return await(new Bluebird.Promise<T>((resolve) => {
+			Https.get(url, (res) => {
+				var data = "";
+				res.on("data", (chunk : string) => {
+					data += chunk;
+				});
+				res.on("end", () => {
+					resolve(<T>JSON.parse(data));
+				});
 			});
-			res.on("end", () => {
-				callback(new Buffer(data, "binary"));
+		}));
+	}
+	
+	function fetchBinary(url : string) {
+		return await(new Bluebird.Promise<Buffer>((resolve) => {
+			Https.get(url, (res) => {
+				var data : Buffer[] = [];
+				res.on("data", (chunk : Buffer) => {
+					data.push(chunk);
+				});
+				res.on("end", () => {
+					resolve(Buffer.concat(data));
+				});
 			});
-		});
+		}));
 	}
 }

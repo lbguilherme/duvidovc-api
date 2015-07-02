@@ -30,31 +30,20 @@ class DB {
 		}
 
 		this.db = db;
-		this.users = db.collection("users");
-		this.tokens = db.collection("tokens");
-		this.challenges = db.collection("challenges");
-		this.uploads = db.collection("uploads");
+		this.users = new DB.Collection<DB.User>(db.collection("users"));
+		this.tokens = new DB.Collection<DB.Token>(db.collection("tokens"));
+		this.challenges = new DB.Collection<DB.Challenge>(db.collection("challenges"));
+		this.uploads = new DB.Collection<DB.Upload>(db.collection("uploads"));
 		this.connectedCallback();
 	}
 
 }
 
+import DBCollection = require("./DB.Collection");
+
 module DB {
-	export interface Collection<T> extends MongoDB.Collection {
-		insertOne(query : T, callback : (err : Error, result : T) => void) : void;
-		insertOne(query : T, options : { safe? : any; continueOnError? : boolean; keepGoing? : boolean; serializeFunctions? : boolean; }, callback : (err : Error, result : T) => void) : void;
-
-		updateOne(selector : Object, document : any, callback? : (err : Error) => void) : void;
-		updateOne(selector : Object, document : any, options : { safe? : boolean; upsert? : any; multi? : boolean; serializeFunctions? : boolean; }, callback? : (err : Error) => void) : void;
-
-		findOne(callback? : (err : Error, result : T) => void) : MongoDB.Cursor;
-		findOne(selector : Object, callback? : (err : Error, result : T) => void) : MongoDB.Cursor;
-		findOne(selector : Object, fields : any, callback? : (err : Error, result : T) => void) : MongoDB.Cursor;
-		findOne(selector : Object, options : MongoDB.CollectionFindOptions, callback? : (err : Error, result : T) => void) : MongoDB.Cursor;
-		findOne(selector : Object, fields : any, options : MongoDB.CollectionFindOptions, callback? : (err : Error, result : T) => void) : MongoDB.Cursor;
-		findOne(selector : Object, fields : any, skip : number, limit : number, callback? : (err : Error, result : T) => void) : MongoDB.Cursor;
-		findOne(selector : Object, fields : any, skip : number, limit : number, timeout : number, callback? : (err : Error, result : T) => void) : MongoDB.Cursor;
-	}
+	
+	export class Collection<T> extends DBCollection<T> {}
 	
 	export interface Token {
 		token : string

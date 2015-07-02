@@ -1,12 +1,15 @@
 /// <reference path="../decl/node.d.ts" />
+/// <reference path="../decl/asyncawait.d.ts" />
 
 export = Server;
 
 import Net = require("net");
 import Http = require("http");
 import Url = require("url");
-import ApiVersions = require("ApiVersions");
-import Tracker = require("Tracker");
+import async = require("asyncawait/async");
+import ApiVersions = require("./ApiVersions");
+import Tracker = require("./Tracker");
+import Utility = require("./Utility");
 
 class Server {
 	
@@ -46,33 +49,24 @@ class Server {
 	}
 	
 	private onRequest(msg : Http.IncomingMessage, resp : Http.ServerResponse) {
-		console.log(msg.url);
-		var ip = msg.headers["x-forwarded-for"] || msg.socket.remoteAddress;
-		var request = Url.parse(msg.url, true);
-		var path = request.pathname.split("/");
-		var apiVersion = path[1];
-		var api = ApiVersions[apiVersion];
-		var method = msg.method.toLowerCase()
-		var endpoint = "/" + path.slice(2).join("/");
-		var endpointMethod = method + endpoint.replace(/\//g, "_");
-		var query = request.query;
-		
-		var tracker = new Tracker();
-		tracker.setIp(ip);
-		tracker.setEndpoint(endpoint);
-		tracker.setApiVersion(apiVersion);
-		
-		query.body = "";
-		msg.on("data", (data : string) => {
-			query.body += data;
-		});
-		
-		msg.on("end", () => {
-			if (msg.headers["Content-Length"] && msg.headers["Content-Length"] !== query.body.length) {
-				resp.statusCode = 400;
-				resp.end();
-				return;
-			}
+		async(() => {
+			console.log(msg.url);
+			var ip = msg.headers["x-forwarded-for"] || msg.socket.remoteAddress;
+			var request = Url.parse(msg.url, true);
+			var path = request.pathname.split("/");
+			var apiVersion = path[1];
+			var api = ApiVersions[apiVersion];
+			var method = msg.method.toLowerCase()
+			var endpoint = "/" + path.slice(2).join("/");
+			var endpointMethod = method + endpoint.replace(/\//g, "_");
+			var query = request.query;
+			
+			var tracker = new Tracker();
+			tracker.setIp(ip);
+			tracker.setEndpoint(endpoint);
+			tracker.setApiVersion(apiVersion);
+			
+			query.body = Utility.readAll(msg);
 			
 			if (!api) {
 				resp.statusCode = 404;
@@ -83,10 +77,10 @@ class Server {
 					resp.statusCode = 404;
 					resp.end();
 				} else {
-					api[endpointMethod](tracker, query, resp);
+					endpointFunction(tracker, query, resp);
 				}
 			}
-		});
+		})();
 	}
 
 	private onError(err : Error) {
