@@ -77,7 +77,26 @@ class Server {
 					resp.statusCode = 404;
 					resp.end();
 				} else {
-					endpointFunction(tracker, query, resp);
+					try {
+						endpointFunction(tracker, query, resp);
+					} catch (e) {
+						resp.setHeader("Content-Type", "text/plain");
+						
+						if (e instanceof Error) {
+							if (e.message.indexOf("OAuthException") != -1)
+								resp.statusCode = 401;
+							else
+								resp.statusCode = 500;
+							
+							resp.write("Error: " + e.message);
+						} else {
+							resp.statusCode = 500;
+							resp.write(e);
+						}
+						
+						resp.end();
+						tracker.end();
+					}
 				}
 			}
 		})();
