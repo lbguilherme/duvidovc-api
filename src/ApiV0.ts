@@ -71,12 +71,12 @@ class ApiV0 extends ApiBase {
 		}));
 		
 		resp.setHeader("Content-Type", "application/octet-stream");
-		for (var i = 0; i < avatars.length; ++i) {
-			var buf = new Buffer(4);
-			buf.writeUInt32BE(avatars[i].length, 0);
-			resp.write(buf);
-			resp.write(avatars[i]);
-		}
+		avatars.forEach(avatar => {
+			var size = new Buffer(4);
+			size.writeUInt32BE(avatar.length, 0);
+			resp.write(size);
+			resp.write(avatar);
+		});
 		resp.end();
 	}
 
@@ -207,17 +207,16 @@ class ApiV0 extends ApiBase {
 		
 		// Collect all ids
 		var ids : string[] = [];
-		for (var i = 0; challenges.length; ++i) {
-			var targets = challenges[i].data.targets;
-			for (var j = 0; targets.length; ++j) {
-				var id = targets[i].id;
+		challenges.forEach(challenge => {
+			challenge.data.targets.forEach(target => {
+				var id = target.id;
 				if (ids.indexOf(id) != -1)
 					ids.push(id);
-			}
-		}
+			});
+		});
 		
 		// Fetch the name of each id
-		var names : {[id : string] : string} = {}
+		var names : {[id : string] : string} = {};
 		
 		await(ids.map(id => {
 			return async(() => {
@@ -225,10 +224,9 @@ class ApiV0 extends ApiBase {
 			})();
 		}));
 		
-		
 		// Add all challenges to the final reply list
-		for (var i = 0; challenges.length; ++i) {
-			var c = challenges[i].data;
+		challenges.forEach(challenge => {
+			var c = challenge.data;
 			infos.push({
 				id: c.id,
 				title: c.title,
@@ -243,7 +241,7 @@ class ApiV0 extends ApiBase {
 					submissions: target.submissions
 				};})
 			});
-		}
+		});
 		
 		resp.setHeader("Content-Type", "application/json");
 		resp.write(JSON.stringify(infos));

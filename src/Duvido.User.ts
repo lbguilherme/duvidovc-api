@@ -100,13 +100,13 @@ class User {
 			var friends = Facebook.getFriends(token);
 			var ids = friends.map(f => {return f.id;});
 			this.setFriendsAsync(ids);
-			for (var i = 0; i < friends.length; ++i) {
+			friends.forEach(friendInfo => {
 				async(() => {
-						var friend = new User(friends[i].id);
-						friend.setNameAsync(friends[i].name);
-						friend.addFriend(this.id);
+					var friend = new User(friendInfo.id);
+					friend.setNameAsync(friendInfo.name);
+					friend.addFriend(this.id);
 				})();
-			}
+			});
 			return ids.map(id => {return new User(id);});
 		}
 	}
