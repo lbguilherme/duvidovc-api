@@ -21,10 +21,8 @@ class ApiV0 extends ApiBase {
 	 * }
 	 */
 	post_login(tracker : Tracker, params : any, resp : Http.ServerResponse) {
-		if (!params.token) {
-			this.fail(tracker, "token must be provided", resp);
-			return;
-		}
+		if (!params.token)
+			throw new Error("token must be provided");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var name = user.getName(params.token);
@@ -64,10 +62,8 @@ class ApiV0 extends ApiBase {
 	 */
 	get_avatars(tracker : Tracker, params : {id:string}, resp : Http.ServerResponse) {
 		var ids = params.id.split(",");
-		if (ids.length > 100) {
-			this.fail(tracker, "too many avatars", resp);
-			return;
-		}
+		if (ids.length > 100)
+			throw new Error("too many avatars");
 		
 		var avatars = await(ids.map(id => {
 			return async(() => {
@@ -98,10 +94,8 @@ class ApiV0 extends ApiBase {
 	 * }
 	 */
 	get_friends(tracker : Tracker, params : any, resp : Http.ServerResponse) {
-		if (!params.token) {
-			this.fail(tracker, "token must be provided", resp);
-			return;
-		}
+		if (!params.token)
+			throw new Error("token must be provided");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var friends = await(user.getFriends(params.token).map(user => {
@@ -127,10 +121,8 @@ class ApiV0 extends ApiBase {
 	 * Returns: Plaintext: the upload id
 	 */
 	post_upload(tracker : Tracker, params : any, resp : Http.ServerResponse) {
-		if (!params.token) {
-			this.fail(tracker, "token must be provided", resp);
-			return;
-		}
+		if (!params.token)
+			throw new Error("token must be provided");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var upload = Duvido.Upload.create(user, new Buffer(params.body, "binary"));
@@ -157,10 +149,8 @@ class ApiV0 extends ApiBase {
 	 * Returns: Nothing
 	 */
 	post_challenge(tracker : Tracker, params : any, resp : Http.ServerResponse) {
-		if (!params.token) {
-			this.fail(tracker, "token must be provided", resp);
-			return;
-		}
+		if (!params.token)
+			throw new Error("token must be provided");
 		
 		var user = Duvido.User.fromToken(params.token);
 			
@@ -211,10 +201,8 @@ class ApiV0 extends ApiBase {
 			}[]
 		}[] = [];
 		
-		if (!params.token) {
-			this.fail(tracker, "token must be provided", resp);
-			return;
-		}
+		if (!params.token)
+			throw new Error("token must be provided");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var challenges = Duvido.Challenge.listFromOwner(user);
