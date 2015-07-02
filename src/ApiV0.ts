@@ -104,7 +104,7 @@ class ApiV0 extends ApiBase {
 		}
 		
 		var user = Duvido.User.fromToken(params.token);
-		var friends = await(user.getFriends().map(user => {
+		var friends = await(user.getFriends(params.token).map(user => {
 			return async(() => {
 				return {id: user.id, name: user.getName(params.token)};
 			})();
@@ -115,7 +115,7 @@ class ApiV0 extends ApiBase {
 		resp.end();
 		
 		tracker.setUserId(user.id);
-		tracker.setName(user.getName());
+		tracker.setName(user.getName(params.token));
 		tracker.end();
 	}
 	
@@ -140,7 +140,7 @@ class ApiV0 extends ApiBase {
 		resp.end();
 		
 		tracker.setUserId(user.id);
-		tracker.setName(user.getName());
+		tracker.setName(user.getName(params.token));
 		tracker.end();
 	}
 
@@ -179,7 +179,7 @@ class ApiV0 extends ApiBase {
 		resp.end();
 		
 		tracker.setUserId(user.id);
-		tracker.setName(user.getName());
+		tracker.setName(user.getName(params.token));
 		tracker.end();
 	}
 	
@@ -235,7 +235,7 @@ class ApiV0 extends ApiBase {
 		
 		await(ids.map(id => {
 			return async(() => {
-				names[id] = new Duvido.User(id).getName();
+				names[id] = new Duvido.User(id).getName(params.token);
 			})();
 		}));
 		
@@ -264,7 +264,7 @@ class ApiV0 extends ApiBase {
 		resp.end();
 		
 		tracker.setUserId(user.id);
-		tracker.setName(user.getName());
+		tracker.setName(user.getName(params.token));
 		tracker.end();
 	}
 }

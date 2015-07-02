@@ -91,13 +91,12 @@ class User {
 		}
 	}
 
-	getFriends() {
+	getFriends(token : string) {
 		var user = DB.users.findOne({id : this.id});
 		
 		if (user && user.friends) {
 			return user.friends.map(id => {return new User(id);});
 		} else {
-			var token = this.getToken();
 			var friends = Facebook.getFriends(token);
 			var ids = friends.map(f => {return f.id;});
 			this.setFriendsAsync(ids);
@@ -116,18 +115,14 @@ class User {
 		DB.users.updateOneAsync({id: this.id}, {$set: {id: this.id, name: name}});
 	}
 
-	getName(token? : string) : string {
-		if (token == null) {
-			return this.getName(this.getToken());
+	getName(token : string) : string {
+		var user = DB.users.findOne({id : this.id}, {_id: 0, name: 1});
+		if (user && user.name) {
+			return user.name;
 		} else {
-			var user = DB.users.findOne({id : this.id}, {_id: 0, name: 1});
-			if (user && user.name) {
-				return user.name;
-			} else {
-				var userInfo = Facebook.getUser(token, this.id);
-				this.setNameAsync(userInfo.name);
-				return userInfo.name;
-			}
+			var userInfo = Facebook.getUser(token, this.id);
+			this.setNameAsync(userInfo.name);
+			return userInfo.name;
 		}
 	}
 }
