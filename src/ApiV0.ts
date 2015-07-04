@@ -27,7 +27,7 @@ class ApiV0 extends ApiBase {
 		var name = user.getName(params.token);
 		user.setLastLoginAsync();
 		
-		resp.setHeader("Content-Type", "application/json");
+		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify({id: user.id, name: name}));
 		resp.end();
 		
@@ -105,7 +105,7 @@ class ApiV0 extends ApiBase {
 			})();
 		}));
 		
-		resp.setHeader("Content-Type", "application/json");
+		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify(friends));
 		resp.end();
 		
@@ -246,7 +246,7 @@ class ApiV0 extends ApiBase {
 			});
 		});
 		
-		resp.setHeader("Content-Type", "application/json");
+		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify(infos));
 		resp.end();
 		
