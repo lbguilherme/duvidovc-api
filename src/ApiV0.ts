@@ -197,8 +197,8 @@ class ApiV0 extends ApiBase {
 					status : string // "waiting" | "accepted" | "rejected"
 					text : string
 					image : string
-					sentTime : Date
-					judgedTime : Date
+					sentTime : string
+					judgedTime : string
 				}[]
 			}[]
 		}[] = [];
@@ -238,7 +238,13 @@ class ApiV0 extends ApiBase {
 					id: target.id,
 					name: names[target.id],
 					status: target.status,
-					submissions: target.submissions
+					submissions: target.submissions.map(submission => {return {
+						status: submission.status,
+						text: submission.text,
+						image: submission.image,
+						sentTime: submission.sentTime.getTime()+"",
+						judgedTime: submission.judgedTime.getTime()+""
+					};})
 				};})
 			});
 		});
