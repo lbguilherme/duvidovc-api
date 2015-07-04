@@ -251,4 +251,68 @@ class ApiV0 extends ApiBase {
 		tracker.setName(user.getName(params.token));
 		tracker.end();
 	}
+	
+	
+	/**
+	 * GET /v0/feed
+	 * - token: user token
+	 * 
+	 * Returns: The "info" variable
+	 */
+	get_feed(tracker : Tracker, params : {token : string}, resp : Http.ServerResponse) {
+		Utility.typeCheck(params, {token: "string"}, "params");
+		
+		var infos : {
+			id : string
+			owner : string
+			ownerName : string
+			title : string
+			description : string
+			reward : string
+			duration : number
+			image : string
+		}[] = [];
+		
+		var user = Duvido.User.fromToken(params.token);
+		var challenges = Duvido.Challenge.listFromTarget(user);
+		
+		// Collect all ids
+		var ids : string[] = [];
+		challenges.forEach(challenge => {
+			var id = challenge.data.owner;
+			if (ids.indexOf(id) == -1)
+				ids.push(id);
+		});
+		
+		// Fetch the name of each id
+		var names : {[id : string] : string} = {};
+		await(ids.map(id => {
+			return async(() => {
+				names[id] = new Duvido.User(id).getName(params.token);
+			})();
+		}));
+		
+		// Add all challenges to the final reply list
+		challenges.forEach(challenge => {
+			var c = challenge.data;
+			infos.push({
+				id: c.id,
+				owner: c.owner,
+				ownerName: names[c.owner],
+				title: c.title,
+				description: c.description,
+				reward: c.reward,
+				duration: c.duration,
+				image: c.image
+			});
+		});
+		
+		resp.setHeader("Content-Type", "application/json; charset=utf-8");
+		resp.write(JSON.stringify(infos));
+		resp.end();
+		
+		tracker.setUserId(user.id);
+		tracker.setName(user.getName(params.token));
+		tracker.end();
+	}
 }
