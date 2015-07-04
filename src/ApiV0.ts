@@ -3,6 +3,7 @@ export = ApiV0;
 import ApiBase = require("./ApiBase");
 import Duvido = require("./Duvido");
 import Tracker = require("./Tracker");
+import Utility = require("./Utility");
 import Http = require("http");
 import await = require("asyncawait/await");
 import async = require("asyncawait/async");
@@ -19,9 +20,8 @@ class ApiV0 extends ApiBase {
 	 *  name : string, the current user's name
 	 * }
 	 */
-	post_login(tracker : Tracker, params : any, resp : Http.ServerResponse) {
-		if (!params.token)
-			throw new Error("token must be provided");
+	post_login(tracker : Tracker, params : {token : string}, resp : Http.ServerResponse) {
+		Utility.typeCheck(params, {token: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var name = user.getName(params.token);
@@ -43,7 +43,9 @@ class ApiV0 extends ApiBase {
 	 * Returns: BINARY
 	 * JPG encoded avatar image.
 	 */
-	get_avatar(tracker : Tracker, params : {id:string}, resp : Http.ServerResponse) {
+	get_avatar(tracker : Tracker, params : {id : string}, resp : Http.ServerResponse) {
+		Utility.typeCheck(params, {id: "string"}, "params");
+		
 		var user = new Duvido.User(params.id);
 		resp.setHeader("Content-Type", "image/jpeg");
 		resp.write(user.getAvatar());
@@ -59,7 +61,9 @@ class ApiV0 extends ApiBase {
 	 *   - a 4-byte unsigned integer (big endian) to specify image size in bytes
 	 *   - the avatar image data as JPG
 	 */
-	get_avatars(tracker : Tracker, params : {id:string}, resp : Http.ServerResponse) {
+	get_avatars(tracker : Tracker, params : {id : string}, resp : Http.ServerResponse) {
+		Utility.typeCheck(params, {id: "string"}, "params");
+		
 		var ids = params.id.split(",");
 		if (ids.length > 100)
 			throw new Error("too many avatars");
@@ -91,9 +95,8 @@ class ApiV0 extends ApiBase {
 	 *  name : string, his name
 	 * }
 	 */
-	get_friends(tracker : Tracker, params : any, resp : Http.ServerResponse) {
-		if (!params.token)
-			throw new Error("token must be provided");
+	get_friends(tracker : Tracker, params : {token : string}, resp : Http.ServerResponse) {
+		Utility.typeCheck(params, {token: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var friends = await(user.getFriends(params.token).map(user => {
@@ -118,9 +121,8 @@ class ApiV0 extends ApiBase {
 	 * 
 	 * Returns: Plaintext: the upload id
 	 */
-	post_upload(tracker : Tracker, params : any, resp : Http.ServerResponse) {
-		if (!params.token)
-			throw new Error("token must be provided");
+	post_upload(tracker : Tracker, params : {token : string, body : string}, resp : Http.ServerResponse) {
+		Utility.typeCheck(params, {token: "string", body: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var upload = Duvido.Upload.create(user, new Buffer(params.body, "binary"));
@@ -146,12 +148,12 @@ class ApiV0 extends ApiBase {
 	 * 
 	 * Returns: Nothing
 	 */
-	post_challenge(tracker : Tracker, params : any, resp : Http.ServerResponse) {
-		if (!params.token)
-			throw new Error("token must be provided");
+	post_challenge(tracker : Tracker, params : {token : string, title : string, description : string, reward : string,
+		                                        targets : string, duration : string, image : string}, resp : Http.ServerResponse) {
+		Utility.typeCheck(params, {
+			token: "string", title: "string", description: "string", reward: "string", targets: "string", duration: "string", image: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
-			
 		var info : Duvido.Challenge.CreationInfo = {
 			owner: user.id,
 			title: params.title,
@@ -177,7 +179,9 @@ class ApiV0 extends ApiBase {
 	 * 
 	 * Returns: The "info" variable
 	 */
-	get_challenges(tracker : Tracker, params : any, resp : Http.ServerResponse) {
+	get_challenges(tracker : Tracker, params : {token : string}, resp : Http.ServerResponse) {
+		Utility.typeCheck(params, {token: "string"}, "params");
+		
 		var infos : {
 			id : string
 			title : string
@@ -227,6 +231,13 @@ class ApiV0 extends ApiBase {
 		// Add all challenges to the final reply list
 		challenges.forEach(challenge => {
 			var c = challenge.data;
+			console.log(c.targets);
+			console.log(c.targets.map(target => {return {
+				id: target.id,
+				name: names[target.id],
+				status: target.status,
+				submissions: target.submissions
+			};}));
 			infos.push({
 				id: c.id,
 				title: c.title,
