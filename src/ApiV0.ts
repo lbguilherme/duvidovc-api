@@ -203,9 +203,6 @@ class ApiV0 extends ApiBase {
 			}[]
 		}[] = [];
 		
-		if (!params.token)
-			throw new Error("token must be provided");
-		
 		var user = Duvido.User.fromToken(params.token);
 		var challenges = Duvido.Challenge.listFromOwner(user);
 		
