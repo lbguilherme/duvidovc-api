@@ -221,7 +221,6 @@ class ApiV0 extends ApiBase {
 		
 		// Fetch the name of each id
 		var names : {[id : string] : string} = {};
-		
 		await(ids.map(id => {
 			return async(() => {
 				names[id] = new Duvido.User(id).getName(params.token);
@@ -231,13 +230,6 @@ class ApiV0 extends ApiBase {
 		// Add all challenges to the final reply list
 		challenges.forEach(challenge => {
 			var c = challenge.data;
-			console.log(c.targets);
-			console.log(c.targets.map(target => {return {
-				id: target.id,
-				name: names[target.id],
-				status: target.status,
-				submissions: target.submissions
-			};}));
 			infos.push({
 				id: c.id,
 				title: c.title,
