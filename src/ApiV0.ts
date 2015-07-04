@@ -214,7 +214,7 @@ class ApiV0 extends ApiBase {
 		challenges.forEach(challenge => {
 			challenge.data.targets.forEach(target => {
 				var id = target.id;
-				if (ids.indexOf(id) != -1)
+				if (ids.indexOf(id) == -1)
 					ids.push(id);
 			});
 		});
