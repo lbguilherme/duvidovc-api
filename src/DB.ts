@@ -58,6 +58,8 @@ module DB {
 		avatar? : MongoDB.Binary
 		friends? : string[]
 		name? : string
+		firstName? : string
+		lastName? : string
 	}
 	
 	export interface Upload {

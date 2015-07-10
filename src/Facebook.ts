@@ -5,7 +5,7 @@ import await = require("asyncawait/await");
 import Bluebird = require("bluebird");
 
 module Facebook {
-	var url = "https://graph.facebook.com/v2.3";
+	var url = "https://graph.facebook.com/v2.4";
 	
 	export interface FacebookError {
 		error : {
@@ -17,6 +17,8 @@ module Facebook {
 	export interface User extends FacebookError {
 		id : string;
 		name : string;
+		first_name : string;
+		last_name : string;
 	};
 	
 	export interface TokenInfo extends FacebookError {
@@ -58,7 +60,7 @@ module Facebook {
 	}
 
 	export function getUser(token : string, id : string) {
-		var user = fetchJson<User>(url+"/"+id+"/?access_token="+token);
+		var user = fetchJson<User>(url+"/"+id+"/?fields=id,name,first_name,last_name&access_token="+token);
 		
 		if (user.error)
 			throw new Error(user.error.type + ": " + user.error.message);
