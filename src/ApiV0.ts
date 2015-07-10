@@ -2,7 +2,6 @@ export = ApiV0;
 
 import ApiBase = require("./ApiBase");
 import Duvido = require("./Duvido");
-import Tracker = require("./Tracker");
 import Utility = require("./Utility");
 import Http = require("http");
 import await = require("asyncawait/await");
@@ -20,7 +19,7 @@ class ApiV0 extends ApiBase {
 	 *  name : string, the current user's name
 	 * }
 	 */
-	post_login(tracker : Tracker, params : {token : string}, resp : Http.ServerResponse) {
+	post_login(resp : Http.ServerResponse, params : {token : string}) {
 		Utility.typeCheck(params, {token: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
@@ -30,10 +29,6 @@ class ApiV0 extends ApiBase {
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify({id: user.id, name: name}));
 		resp.end();
-		
-		tracker.setUserId(user.id);
-		tracker.setName(name);
-		tracker.end();
 	}
 
 	/**
@@ -43,7 +38,7 @@ class ApiV0 extends ApiBase {
 	 * Returns: BINARY
 	 * JPG encoded avatar image.
 	 */
-	get_avatar(tracker : Tracker, params : {id : string}, resp : Http.ServerResponse) {
+	get_avatar(resp : Http.ServerResponse, params : {id : string}) {
 		Utility.typeCheck(params, {id: "string"}, "params");
 		
 		var user = new Duvido.User(params.id);
@@ -61,7 +56,7 @@ class ApiV0 extends ApiBase {
 	 *   - a 4-byte unsigned integer (big endian) to specify image size in bytes
 	 *   - the avatar image data as JPG
 	 */
-	get_avatars(tracker : Tracker, params : {id : string}, resp : Http.ServerResponse) {
+	get_avatars(resp : Http.ServerResponse, params : {id : string}) {
 		Utility.typeCheck(params, {id: "string"}, "params");
 		
 		var ids = params.id.split(",");
@@ -95,7 +90,7 @@ class ApiV0 extends ApiBase {
 	 *  name : string, his name
 	 * }
 	 */
-	get_friends(tracker : Tracker, params : {token : string}, resp : Http.ServerResponse) {
+	get_friends(resp : Http.ServerResponse, params : {token : string}) {
 		Utility.typeCheck(params, {token: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
@@ -108,10 +103,6 @@ class ApiV0 extends ApiBase {
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify(friends));
 		resp.end();
-		
-		tracker.setUserId(user.id);
-		tracker.setName(user.getName(params.token));
-		tracker.end();
 	}
 	
 	/**
@@ -121,7 +112,7 @@ class ApiV0 extends ApiBase {
 	 * 
 	 * Returns: Plaintext: the upload id
 	 */
-	post_upload(tracker : Tracker, params : {token : string, body : string}, resp : Http.ServerResponse) {
+	post_upload(resp : Http.ServerResponse, params : {token : string, body : string}) {
 		Utility.typeCheck(params, {token: "string", body: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
@@ -130,10 +121,6 @@ class ApiV0 extends ApiBase {
 		resp.setHeader("Content-Type", "text/plain");
 		resp.write(upload.id);
 		resp.end();
-		
-		tracker.setUserId(user.id);
-		tracker.setName(user.getName(params.token));
-		tracker.end();
 	}
 
 	/**
@@ -148,8 +135,8 @@ class ApiV0 extends ApiBase {
 	 * 
 	 * Returns: Nothing
 	 */
-	post_challenge(tracker : Tracker, params : {token : string, title : string, description : string, reward : string,
-		                                        targets : string, duration : string, image : string}, resp : Http.ServerResponse) {
+	post_challenge(resp : Http.ServerResponse, params : {token : string, title : string, description : string, reward : string,
+		                                                 targets : string, duration : string, image : string}) {
 		Utility.typeCheck(params, {
 			token: "string", title: "string", description: "string", reward: "string", targets: "string", duration: "string", image: "string"}, "params");
 		
@@ -167,10 +154,6 @@ class ApiV0 extends ApiBase {
 		var challenge = Duvido.Challenge.create(info);
 		
 		resp.end();
-		
-		tracker.setUserId(user.id);
-		tracker.setName(user.getName(params.token));
-		tracker.end();
 	}
 	
 	/**
@@ -179,7 +162,7 @@ class ApiV0 extends ApiBase {
 	 * 
 	 * Returns: The "info" variable
 	 */
-	get_challenges(tracker : Tracker, params : {token : string}, resp : Http.ServerResponse) {
+	get_challenges(resp : Http.ServerResponse, params : {token : string}) {
 		Utility.typeCheck(params, {token: "string"}, "params");
 		
 		var infos : {
@@ -252,10 +235,6 @@ class ApiV0 extends ApiBase {
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify(infos));
 		resp.end();
-		
-		tracker.setUserId(user.id);
-		tracker.setName(user.getName(params.token));
-		tracker.end();
 	}
 	
 	
@@ -265,7 +244,7 @@ class ApiV0 extends ApiBase {
 	 * 
 	 * Returns: The "info" variable
 	 */
-	get_feed(tracker : Tracker, params : {token : string}, resp : Http.ServerResponse) {
+	get_feed(resp : Http.ServerResponse, params : {token : string}) {
 		Utility.typeCheck(params, {token: "string"}, "params");
 		
 		var infos : {
@@ -316,9 +295,5 @@ class ApiV0 extends ApiBase {
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify(infos));
 		resp.end();
-		
-		tracker.setUserId(user.id);
-		tracker.setName(user.getName(params.token));
-		tracker.end();
 	}
 }

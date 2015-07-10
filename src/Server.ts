@@ -8,7 +8,6 @@ import Http = require("http");
 import Url = require("url");
 import async = require("asyncawait/async");
 import ApiVersions = require("./ApiVersions");
-import Tracker = require("./Tracker");
 import Utility = require("./Utility");
 
 class Server {
@@ -61,11 +60,6 @@ class Server {
 			var endpointMethod = method + endpoint.replace(/\//g, "_");
 			var query = request.query;
 			
-			var tracker = new Tracker();
-			tracker.setIp(ip);
-			tracker.setEndpoint(endpoint);
-			tracker.setApiVersion(apiVersion);
-			
 			query.body = Utility.readAll(msg);
 			
 			if (!api) {
@@ -78,7 +72,7 @@ class Server {
 					resp.end();
 				} else {
 					try {
-						endpointFunction(tracker, query, resp);
+						endpointFunction(resp, query);
 					} catch (e) {
 						resp.setHeader("Content-Type", "text/plain");
 						
@@ -95,8 +89,6 @@ class Server {
 						}
 						
 						resp.end();
-						tracker.setStatus(resp.statusCode);
-						tracker.end();
 					}
 				}
 			}
