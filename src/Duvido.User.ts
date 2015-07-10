@@ -115,7 +115,7 @@ class User {
 		DB.users.updateOneAsync({id: this.id}, {$set: {id: this.id, name: name}});
 	}
 
-	getName(token : string) : string {
+	getName(token : string) {
 		var user = DB.users.findOne({id : this.id}, {_id: 0, name: 1});
 		if (user && user.name) {
 			return user.name;
