@@ -132,7 +132,7 @@ class User {
 
 	getFirstLastName(token : string) {
 		var user = DB.users.findOne({id : this.id}, {_id: 0, name: 1});
-		if (user && user.name) {
+		if (user && user.firstName && user.lastName) {
 			return [user.firstName, user.lastName];
 		} else {
 			var userInfo = Facebook.getUser(token, this.id);
