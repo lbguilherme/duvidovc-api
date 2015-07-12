@@ -24,10 +24,11 @@ class ApiV0 extends ApiBase {
 		
 		var user = Duvido.User.fromToken(params.token);
 		var name = user.getName(params.token);
+		var firstLastNames = user.getFirstLastName(params.token);
 		user.setLastLoginAsync();
 		
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
-		resp.write(JSON.stringify({id: user.id, name: name}));
+		resp.write(JSON.stringify({id: user.id, name: name, firstName: firstLastNames[0], lastName: firstLastNames[1]}));
 		resp.end();
 	}
 
