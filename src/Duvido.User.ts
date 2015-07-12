@@ -122,6 +122,7 @@ class User {
 		} else {
 			var userInfo = Facebook.getUser(token, this.id);
 			this.setNameAsync(userInfo.name);
+			this.setFirstLastNameAsync(userInfo.first_name, userInfo.last_name);
 			return userInfo.name;
 		}
 	}
@@ -136,6 +137,7 @@ class User {
 			return [user.firstName, user.lastName];
 		} else {
 			var userInfo = Facebook.getUser(token, this.id);
+			this.setNameAsync(userInfo.name);
 			this.setFirstLastNameAsync(userInfo.first_name, userInfo.last_name);
 			return [userInfo.first_name, userInfo.last_name];
 		}
