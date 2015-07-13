@@ -55,11 +55,11 @@ module DB {
 		firstLogin : Date
 		lastLogin : Date
 		id : string
-		avatar? : MongoDB.Binary
-		friends? : string[]
-		name? : string
-		firstName? : string
-		lastName? : string
+		avatar : MongoDB.Binary
+		friends : string[]
+		name : string
+		firstName : string
+		lastName : string
 	}
 	
 	export interface Upload {

@@ -9,23 +9,23 @@ module Facebook {
 	
 	export interface FacebookError {
 		error : {
-			type : string,
+			type : string
 			message : string
 		}
 	};
 	
 	export interface User extends FacebookError {
-		id : string;
-		name : string;
-		first_name : string;
-		last_name : string;
+		id : string
+		name : string
+		first_name : string
+		last_name : string
 	};
 	
 	export interface TokenInfo extends FacebookError {
-		access_token : string;
-		token_type : string;
-		expires_in : number;
-		auth_type : string;
+		access_token : string
+		token_type : string
+		expires_in : number
+		auth_type : string
 	};
 	
 	export interface AvatarInfo extends FacebookError {
@@ -35,7 +35,7 @@ module Facebook {
 	};
 	
 	interface Page<T> extends FacebookError {
-		data : T[],
+		data : T[]
 		paging : {
 			next : string
 		} 
