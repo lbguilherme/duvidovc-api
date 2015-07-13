@@ -60,6 +60,8 @@ module DB {
 		name : string
 		firstName : string
 		lastName : string
+		gender : string
+		birthday : string
 	}
 	
 	export interface Upload {

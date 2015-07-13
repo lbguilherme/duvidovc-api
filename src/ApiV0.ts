@@ -19,6 +19,8 @@ class ApiV0 extends ApiBase {
 	 *  name : string, the current user's name
 	 *  firstName : string, the current user's first name
 	 *  lastName : string, the current user's last name
+	 *  birthday : string, the current user's birthday
+	 *  gender : string, the current user's gender
 	 * }
 	 */
 	post_login(resp : Http.ServerResponse, params : {token : string}) {
@@ -27,10 +29,19 @@ class ApiV0 extends ApiBase {
 		var user = Duvido.User.fromToken(params.token);
 		var name = user.getName(params.token);
 		var firstLastNames = user.getFirstLastName(params.token);
+		var birthday = user.getBirthday(params.token);
+		var gender = user.getGender(params.token);
 		user.setLastLoginAsync();
 		
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
-		resp.write(JSON.stringify({id: user.id, name: name, firstName: firstLastNames[0], lastName: firstLastNames[1]}));
+		resp.write(JSON.stringify({
+			id: user.id,
+			name: name,
+			firstName: firstLastNames[0],
+			lastName: firstLastNames[1],
+			birthday: birthday,
+			gender: gender
+		}));
 		resp.end();
 	}
 

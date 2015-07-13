@@ -121,6 +121,8 @@ class User {
 			name: userInfo.name,
 			firstName: userInfo.first_name,
 			lastName: userInfo.last_name,
+			gender: userInfo.gender,
+			birthday: userInfo.birthday
 		}});
 	}
 	
@@ -143,6 +145,28 @@ class User {
 			var userInfo = Facebook.getUser(token, this.id);
 			this.setFromFacebookUserAsync(userInfo);
 			return [userInfo.first_name, userInfo.last_name];
+		}
+	}
+	
+	getBirthday(token : string) {
+		var user = DB.users.findOne({id : this.id}, {_id: 0, name: 1});
+		if (user && user.birthday) {
+			return user.birthday;
+		} else {
+			var userInfo = Facebook.getUser(token, this.id);
+			this.setFromFacebookUserAsync(userInfo);
+			return userInfo.birthday;
+		}
+	}
+	
+	getGender(token : string) {
+		var user = DB.users.findOne({id : this.id}, {_id: 0, name: 1});
+		if (user && user.gender) {
+			return user.gender;
+		} else {
+			var userInfo = Facebook.getUser(token, this.id);
+			this.setFromFacebookUserAsync(userInfo);
+			return userInfo.gender;
 		}
 	}
 }
