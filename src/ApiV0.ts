@@ -17,6 +17,8 @@ class ApiV0 extends ApiBase {
 	 * {
 	 * 	id : string, the current user's id
 	 *  name : string, the current user's name
+	 *  firstName : string, the current user's first name
+	 *  lastName : string, the current user's last name
 	 * }
 	 */
 	post_login(resp : Http.ServerResponse, params : {token : string}) {
