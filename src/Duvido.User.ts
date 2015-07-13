@@ -41,8 +41,7 @@ class User {
 			var me = Facebook.getMe(token);
 			var user = new User(me.id);
 			user.addToken(token);
-			user.setNameAsync(me.name);
-			user.setFirstLastNameAsync(me.first_name, me.last_name);
+			user.setFromFacebookUserAsync(me);
 			return user;
 		}
 	}
@@ -115,20 +114,25 @@ class User {
 	setNameAsync(name : string) {
 		DB.users.updateOneAsync({id: this.id}, {$set: {id: this.id, name: name}});
 	}
+	
+	setFromFacebookUserAsync(userInfo : Facebook.User) {
+		DB.users.updateOneAsync({id: this.id}, {$set: {
+			id: this.id,
+			name: userInfo.name,
+			firstName: userInfo.first_name,
+			lastName: userInfo.last_name,
+		}});
+	}
+	
 	getName(token : string) {
 		var user = DB.users.findOne({id : this.id}, {_id: 0, name: 1});
 		if (user && user.name) {
 			return user.name;
 		} else {
 			var userInfo = Facebook.getUser(token, this.id);
-			this.setNameAsync(userInfo.name);
-			this.setFirstLastNameAsync(userInfo.first_name, userInfo.last_name);
+			this.setFromFacebookUserAsync(userInfo);
 			return userInfo.name;
 		}
-	}
-
-	setFirstLastNameAsync(firstName : string, lastName : string) {
-		DB.users.updateOneAsync({id: this.id}, {$set: {id: this.id, firstName: firstName, lastName: lastName}});
 	}
 
 	getFirstLastName(token : string) {
@@ -137,8 +141,7 @@ class User {
 			return [user.firstName, user.lastName];
 		} else {
 			var userInfo = Facebook.getUser(token, this.id);
-			this.setNameAsync(userInfo.name);
-			this.setFirstLastNameAsync(userInfo.first_name, userInfo.last_name);
+			this.setFromFacebookUserAsync(userInfo);
 			return [userInfo.first_name, userInfo.last_name];
 		}
 	}
