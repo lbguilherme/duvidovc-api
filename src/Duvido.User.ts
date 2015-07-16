@@ -138,7 +138,7 @@ class User {
 	}
 
 	getFirstLastName(token : string) {
-		var user = DB.users.findOne({id : this.id}, {_id: 0, name: 1});
+		var user = DB.users.findOne({id : this.id}, {_id: 0, firstName: 1, lastName: 1});
 		if (user && user.firstName && user.lastName) {
 			return [user.firstName, user.lastName];
 		} else {
@@ -149,7 +149,7 @@ class User {
 	}
 	
 	getBirthday(token : string) {
-		var user = DB.users.findOne({id : this.id}, {_id: 0, name: 1});
+		var user = DB.users.findOne({id : this.id}, {_id: 0, birthday: 1});
 		if (user && user.birthday) {
 			return user.birthday;
 		} else {
@@ -160,7 +160,7 @@ class User {
 	}
 	
 	getGender(token : string) {
-		var user = DB.users.findOne({id : this.id}, {_id: 0, name: 1});
+		var user = DB.users.findOne({id : this.id}, {_id: 0, gender: 1});
 		if (user && user.gender) {
 			return user.gender;
 		} else {
