@@ -8,6 +8,14 @@ import await = require("asyncawait/await");
 import async = require("asyncawait/async");
 
 class ApiV0 extends ApiBase {
+	
+	/**
+	 * GET /v0/status
+	 */
+	get_status(resp : Http.ServerResponse, params : {}) {
+		resp.write("ok");
+		resp.end();
+	}
 
 	/**
 	 * POST /v0/login
