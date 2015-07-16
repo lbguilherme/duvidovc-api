@@ -122,7 +122,8 @@ class User {
 			firstName: userInfo.first_name,
 			lastName: userInfo.last_name,
 			gender: userInfo.gender,
-			birthday: userInfo.birthday
+			birthday: userInfo.birthday,
+			email: userInfo.email
 		}});
 	}
 	
@@ -167,6 +168,17 @@ class User {
 			var userInfo = Facebook.getUser(token, this.id);
 			this.setFromFacebookUserAsync(userInfo);
 			return userInfo.gender;
+		}
+	}
+	
+	getEmail(token : string) {
+		var user = DB.users.findOne({id : this.id}, {_id: 0, email: 1});
+		if (user && user.email) {
+			return user.email;
+		} else {
+			var userInfo = Facebook.getUser(token, this.id);
+			this.setFromFacebookUserAsync(userInfo);
+			return userInfo.email;
 		}
 	}
 }

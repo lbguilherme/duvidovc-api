@@ -39,6 +39,7 @@ class ApiV0 extends ApiBase {
 		var firstLastNames = user.getFirstLastName(params.token);
 		var birthday = user.getBirthday(params.token);
 		var gender = user.getGender(params.token);
+		var email = user.getEmail(params.token);
 		user.setLastLoginAsync();
 		
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -48,7 +49,8 @@ class ApiV0 extends ApiBase {
 			firstName: firstLastNames[0],
 			lastName: firstLastNames[1],
 			birthday: birthday,
-			gender: gender
+			gender: gender,
+			email: email
 		}));
 		resp.end();
 	}
