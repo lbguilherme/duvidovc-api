@@ -115,8 +115,8 @@ class User {
 		DB.users.updateOneAsync({id: this.id}, {$set: {id: this.id, name: name}});
 	}
 	
-	setFromFacebookUserAsync(userInfo : Facebook.User) {
-		DB.users.updateOneAsync({id: this.id}, {$set: {
+	setFromFacebookUser(userInfo : Facebook.User) {
+		DB.users.updateOne({id: this.id}, {$set: {
 			id: this.id,
 			name: userInfo.name,
 			firstName: userInfo.first_name,
@@ -133,7 +133,7 @@ class User {
 			return user.name;
 		} else {
 			var userInfo = Facebook.getUser(token, this.id);
-			this.setFromFacebookUserAsync(userInfo);
+			this.setFromFacebookUser(userInfo);
 			return userInfo.name;
 		}
 	}
@@ -144,7 +144,7 @@ class User {
 			return [user.firstName, user.lastName];
 		} else {
 			var userInfo = Facebook.getUser(token, this.id);
-			this.setFromFacebookUserAsync(userInfo);
+			this.setFromFacebookUser(userInfo);
 			return [userInfo.first_name, userInfo.last_name];
 		}
 	}
@@ -155,7 +155,7 @@ class User {
 			return user.birthday;
 		} else {
 			var userInfo = Facebook.getUser(token, this.id);
-			this.setFromFacebookUserAsync(userInfo);
+			this.setFromFacebookUser(userInfo);
 			return userInfo.birthday;
 		}
 	}
@@ -166,7 +166,7 @@ class User {
 			return user.gender;
 		} else {
 			var userInfo = Facebook.getUser(token, this.id);
-			this.setFromFacebookUserAsync(userInfo);
+			this.setFromFacebookUser(userInfo);
 			return userInfo.gender;
 		}
 	}
@@ -177,7 +177,7 @@ class User {
 			return user.email;
 		} else {
 			var userInfo = Facebook.getUser(token, this.id);
-			this.setFromFacebookUserAsync(userInfo);
+			this.setFromFacebookUser(userInfo);
 			return userInfo.email;
 		}
 	}
