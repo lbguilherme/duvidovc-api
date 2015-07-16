@@ -40,7 +40,6 @@ class ApiV0 extends ApiBase {
 		var birthday = user.getBirthday(params.token);
 		var gender = user.getGender(params.token);
 		var email = user.getEmail(params.token);
-		user.setLastLoginAsync();
 		
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify({

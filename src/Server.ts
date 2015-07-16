@@ -9,6 +9,7 @@ import Url = require("url");
 import async = require("asyncawait/async");
 import ApiVersions = require("./ApiVersions");
 import Utility = require("./Utility");
+import InvalidTokenError = require("./InvalidTokenError");
 
 class Server {
 	
@@ -54,43 +55,39 @@ class Server {
 			var request = Url.parse(msg.url, true);
 			var path = request.pathname.split("/");
 			var apiVersion = path[1];
-			var api = ApiVersions[apiVersion];
 			var method = msg.method.toLowerCase()
 			var endpoint = "/" + path.slice(2).join("/");
 			var endpointMethod = method + endpoint.replace(/\//g, "_");
 			var query = request.query;
-			
 			query.body = Utility.readAll(msg);
 			
+			var api = ApiVersions[apiVersion];
 			if (!api) {
 				resp.statusCode = 404;
 				resp.end();
-			} else {
-				var endpointFunction = api[endpointMethod];
-				if (!endpointFunction) {
-					resp.statusCode = 404;
-					resp.end();
+				return;
+			} 
+			
+			var endpointFunction = api[endpointMethod];
+			if (!endpointFunction) {
+				resp.statusCode = 404;
+				resp.end();
+				return;
+			}
+			
+			try {
+				endpointFunction(resp, query);
+			} catch (e) {
+				resp.setHeader("Content-Type", "text/plain");
+				
+				if (e instanceof InvalidTokenError) {
+					resp.statusCode = 401; // Unauthorized
 				} else {
-					try {
-						endpointFunction(resp, query);
-					} catch (e) {
-						resp.setHeader("Content-Type", "text/plain");
-						
-						if (e instanceof Error) {
-							if (e.message.indexOf("OAuthException") != -1)
-								resp.statusCode = 401;
-							else
-								resp.statusCode = 500;
-							
-							resp.write("Error: " + e.message);
-						} else {
-							resp.statusCode = 500;
-							resp.write(e);
-						}
-						
-						resp.end();
-					}
+					resp.statusCode = 500;
 				}
+				
+				resp.write("Error: " + e.name + (e.message ? ": " + e.message : ""));
+				resp.end();
 			}
 		})();
 	}

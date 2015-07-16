@@ -7,6 +7,7 @@ import DB = require("./DB");
 import Facebook = require("./Facebook");
 import MongoDB = require("mongodb");
 import async = require("asyncawait/async");
+import InvalidTokenError = require("./InvalidTokenError");
 
 class User {
 	id : string;
@@ -14,36 +15,45 @@ class User {
 	constructor(id : string) {
 		this.id = id;
 	}
-	
-	setFirstLoginIfNeeded() {
-		var user = DB.users.findOne({id: this.id});
-		if (!user) return;
-		if (user && user.firstLogin) return;
-		DB.users.updateOneAsync({id: this.id}, {$set: {firstLogin: Date.now()}});
-	}
-
-	addToken(token : string) {
-		var key = {token : token};
-		var tokenInfo = Facebook.getTokenInfo(token);
-		DB.tokens.updateOne(key, {$set: {
-			token : token,
-			userId : this.id,
-			expireTime : Date.now() + tokenInfo.expires_in
-		}});
-		this.setFirstLoginIfNeeded();
-	}
 
 	static fromToken(token : string) {
+		var requiredScopes = ["email", "user_birthday", "user_friends", "public_profile"];
 		var tokenInfo = DB.tokens.findOne({token: token});
+		
 		if (tokenInfo) {
-			return new User(tokenInfo.userId);
-		} else {
-			var me = Facebook.getMe(token);
-			var user = new User(me.id);
-			user.addToken(token);
-			user.setFromFacebookUserAsync(me);
-			return user;
+			if (!tokenInfo.permissions)
+				tokenInfo.permissions = [];
+			
+			var acceptableScopes = true;
+			requiredScopes.forEach(scope => {
+				if (tokenInfo.permissions.indexOf(scope) == -1)
+					acceptableScopes = false;
+			});
+			
+			if (tokenInfo.expiresAt < new Date() && acceptableScopes) {
+				return new User(tokenInfo.userId);
+			}
 		}
+		
+		var fbTokenInfo = Facebook.getTokenInfo(token);
+		
+		if (fbTokenInfo.app_id != "1497042670584041" || fbTokenInfo.is_valid == false) {
+			throw new InvalidTokenError();
+		}
+		
+		requiredScopes.forEach(scope => {
+			if (fbTokenInfo.scopes.indexOf(scope) == -1)
+				throw new InvalidTokenError();
+		});
+		
+		DB.tokens.insertOne({
+			token: token,
+			userId: fbTokenInfo.user_id,
+			expiresAt: new Date(fbTokenInfo.expires_at*1000),
+			permissions: fbTokenInfo.scopes
+		});
+		
+		return new User(fbTokenInfo.user_id);
 	}
 	
 	exists() {
@@ -58,12 +68,6 @@ class User {
 		} else {
 			throw new Error("no token available for this user");
 		}
-	}
-	
-	setLastLoginAsync() {
-		var user = DB.users.findOne({id: this.id});
-		if (!user) return;
-		DB.users.updateOne({id: this.id}, {$set: {lastLogin: Date.now()}});
 	}
 
 	getAvatar() {

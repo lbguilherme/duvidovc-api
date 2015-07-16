@@ -3,9 +3,11 @@ export = Facebook;
 import Https = require("https");
 import await = require("asyncawait/await");
 import Bluebird = require("bluebird");
+import InvalidTokenError = require("./InvalidTokenError");
 
 module Facebook {
 	var url = "https://graph.facebook.com/v2.4";
+	var appToken = "1497042670584041|d0b1235dc6e24c7929320ec7a81fe4aa";
 	
 	export interface FacebookError {
 		error : {
@@ -25,10 +27,11 @@ module Facebook {
 	};
 	
 	export interface TokenInfo extends FacebookError {
-		access_token : string
-		token_type : string
-		expires_in : number
-		auth_type : string
+		app_id : string
+		expires_at : number
+		is_valid : boolean
+		scopes : string[]
+		user_id : string
 	};
 	
 	export interface AvatarInfo extends FacebookError {
@@ -36,6 +39,10 @@ module Facebook {
 			url : string
 		}
 	};
+	
+	interface DataWrap<T> {
+		data : T
+	}
 	
 	interface Page<T> extends FacebookError {
 		data : T[]
@@ -45,17 +52,16 @@ module Facebook {
 	}
 
 	export function getAvatar(id : string) {
-		var info = fetchJson<AvatarInfo>(url+"/"+id+"/picture?type=square&width=320&height=320&redirect=0");
+		try {
+			var info = fetchJson<AvatarInfo>(url+"/"+id+"/picture?type=square&width=320&height=320&redirect=0");
+		} catch (e) {
+			if (e instanceof InvalidTokenError)
+				throw new Error(e.message);
+			else
+				throw e;
+		}
 		
-		if (info.error) {
-			if (info.error.type == "OAuthException")
-				info.error.type = "InvalidIdentifier"; // Won't cause logout
-				
-			throw new Error(info.error.type + ": " + info.error.message);
-		}
-		else {
-			return fetchBinary(info.data.url);
-		}
+		return fetchBinary(info.data.url);
 	}
 
 	export function getMe(token : string) {
@@ -63,12 +69,7 @@ module Facebook {
 	}
 
 	export function getUser(token : string, id : string) {
-		var user = fetchJson<User>(url+"/"+id+"/?fields=id,name,first_name,last_name,birthday,gender,email&access_token="+token);
-		
-		if (user.error)
-			throw new Error(user.error.type + ": " + user.error.message);
-		else
-			return user;
+		return fetchJson<User>(url+"/"+id+"/?fields=id,name,first_name,last_name,birthday,gender,email&access_token="+token);
 	}
 	
 	export function getFriends(token : string) {
@@ -88,15 +89,15 @@ module Facebook {
 	}
 	
 	export function getTokenInfo(token : string) {
-		var tokenInfo = fetchJson<TokenInfo>(url+"/oauth/access_token_info?client_id=1497042670584041&access_token="+token);
+		var tokenInfo = fetchPlainJson<DataWrap<TokenInfo>>(url+"/debug_token?input_token="+token+"&access_token="+appToken).data;
 		
 		if (tokenInfo.error)
-			throw new Error(tokenInfo.error.type + ": " + tokenInfo.error.message);
+			throw new InvalidTokenError(tokenInfo.error.message);
 		else
 			return tokenInfo;
 	}
 	
-	function fetchJson<T>(url : string) {
+	function fetchPlainJson<T>(url : string) {
 		return await(new Bluebird.Promise<T>((resolve) => {
 			Https.get(url, (res) => {
 				var data = "";
@@ -108,6 +109,17 @@ module Facebook {
 				});
 			});
 		}));
+	}
+	
+	function fetchJson<T extends FacebookError>(url : string) {
+		var data = fetchPlainJson<T>(url);
+		if (data.error) {
+			if (data.error.type == "OAuthException")
+				throw new InvalidTokenError(data.error.message);
+			else
+				throw new Error(data.error.type + ": " + data.error.message);
+		}
+		return data;
 	}
 	
 	function fetchBinary(url : string) {

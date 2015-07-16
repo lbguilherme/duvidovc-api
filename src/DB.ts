@@ -48,12 +48,11 @@ module DB {
 	export interface Token {
 		token : string
 		userId : string
-		expireTime? : Date
+		expiresAt : Date,
+		permissions : string[]
 	};
 	
 	export interface User {
-		firstLogin : Date
-		lastLogin : Date
 		id : string
 		avatar : MongoDB.Binary
 		friends : string[]
