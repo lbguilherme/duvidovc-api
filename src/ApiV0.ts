@@ -190,6 +190,7 @@ class ApiV0 extends ApiBase {
 		
 		var infos : {
 			id : string
+			creationTime : string
 			title : string
 			description : string
 			reward : string
@@ -235,6 +236,7 @@ class ApiV0 extends ApiBase {
 			var c = challenge.data;
 			infos.push({
 				id: c.id,
+				creationTime: c.creationTime.getTime()+"",
 				title: c.title,
 				description: c.description,
 				reward: c.reward,
@@ -272,6 +274,7 @@ class ApiV0 extends ApiBase {
 		
 		var infos : {
 			id : string
+			creationTime : string
 			owner : string
 			ownerName : string
 			title : string
@@ -305,6 +308,7 @@ class ApiV0 extends ApiBase {
 			var c = challenge.data;
 			infos.push({
 				id: c.id,
+				creationTime: c.creationTime.getTime()+"",
 				owner: c.owner,
 				ownerName: names[c.owner],
 				title: c.title,
