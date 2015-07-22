@@ -16,15 +16,12 @@ class Server {
 	
 	private server : Http.Server;
 
-	constructor() {
+	constructor(port : number, host : string) {
+		console.log("Starting server...");
 		this.server = Http.createServer();
 		this.server.addListener("request", this.onRequest.bind(this));
 		this.server.addListener("error", this.onError.bind(this));
 		this.server.addListener("connection", this.onConnection.bind(this));
-	}
-
-	start(port : number, host : string) {
-		console.log("Starting server...");
 		this.server.listen(port, host, this.onStart.bind(this));
 	}
 
