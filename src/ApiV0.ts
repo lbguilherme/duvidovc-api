@@ -275,8 +275,7 @@ class ApiV0 extends ApiBase {
 		var infos : {
 			id : string
 			creationTime : string
-			owner : string
-			ownerName : string
+			owner : {id : string, name : string}
 			title : string
 			description : string
 			reward : string
@@ -309,8 +308,7 @@ class ApiV0 extends ApiBase {
 			infos.push({
 				id: c.id,
 				creationTime: c.creationTime.getTime()+"",
-				owner: c.owner,
-				ownerName: names[c.owner],
+				owner: {id : c.owner, name: names[c.owner]},
 				title: c.title,
 				description: c.description,
 				reward: c.reward,
