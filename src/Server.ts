@@ -10,6 +10,7 @@ import async = require("asyncawait/async");
 import ApiVersions = require("./ApiVersions");
 import Utility = require("./Utility");
 import InvalidTokenError = require("./InvalidTokenError");
+import InputError = require("./InputError");
 
 class Server {
 	
@@ -63,14 +64,14 @@ class Server {
 			
 			var api = ApiVersions[apiVersion];
 			if (!api) {
-				resp.statusCode = 404;
+				resp.statusCode = 404; // Not Found
 				resp.end();
 				return;
 			} 
 			
 			var endpointFunction = api[endpointMethod];
 			if (!endpointFunction) {
-				resp.statusCode = 404;
+				resp.statusCode = 404; // Not Found
 				resp.end();
 				return;
 			}
@@ -78,15 +79,15 @@ class Server {
 			try {
 				endpointFunction(resp, query);
 			} catch (e) {
-				resp.setHeader("Content-Type", "text/plain");
-				
-				if (e instanceof InvalidTokenError) {
+				if (e instanceof InputError)
+					resp.statusCode = 400; // Bad Request
+				else if (e instanceof InvalidTokenError)
 					resp.statusCode = 401; // Unauthorized
-				} else {
-					resp.statusCode = 500;
-				}
+				else
+					resp.statusCode = 500; // Unknown Error
 				
-				resp.write("Error: " + e.name + (e.message ? ": " + e.message : ""));
+				resp.setHeader("Content-Type", "text/plain");
+				resp.write(e.name + (e.message ? ": " + e.message : ""));
 				resp.end();
 			}
 		})();
