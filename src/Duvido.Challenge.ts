@@ -6,7 +6,7 @@ export = Challenge;
 import DB = require("./DB");
 import Utility = require("./Utility");
 import User = require("./Duvido.User");
-import Upload = require("./Duvido.Upload");
+import Image = require("./Duvido.Image");
 import MongoDB = require("mongodb");
 import UUID = require("node-uuid");
 import await = require("asyncawait/await");
@@ -20,7 +20,7 @@ module Challenge {
 		reward : string,
 		targets : string[],
 		duration : number,
-		image? : Upload
+		image : Image
 	};
 }
 
@@ -40,6 +40,8 @@ class Challenge {
 			title: info.title,
 			description: info.description,
 			reward: info.reward,
+			imageId: "",
+			videoId: "",
 			targets: info.targets.map(id => {return {
 				id: id,
 				status: "sent",
@@ -48,10 +50,14 @@ class Challenge {
 			duration: info.duration
 		}
 		
+		if (info.targets.length == 0) {
+			throw new Error("");
+		}
+		
 		if (info.image) {
 			if (!info.image.exists())
 				throw new Error("Challenge image does not exist");
-			challenge.image = info.image.id;
+			challenge.imageId = info.image.id;
 		}
 		
 		await(info.targets.map(id => {
@@ -86,8 +92,7 @@ class Challenge {
 	getData() {
 		if (this.data)
 			return this.data;
-		else {
+		else
 			return this.data = DB.challenges.findOne({id: this.id}, {_id: 0});
-		}
 	}
 }

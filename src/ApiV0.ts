@@ -129,20 +129,20 @@ class ApiV0 extends ApiBase {
 	}
 	
 	/**
-	 * POST /v0/upload
+	 * POST /v0/image
 	 * - token: The owner token
-	 * post data: The binary data you want to store
+	 * post data: The binary data of the image
 	 * 
-	 * Returns: Plaintext: the upload id
+	 * Returns: Plaintext: the image id
 	 */
-	post_upload(resp : Http.ServerResponse, params : {token : string, body : string}) {
-		Utility.typeCheck(params, {token: "string", body: "string"}, "params");
+	post_image(resp : Http.ServerResponse, params : {token : string, body : string, orientation : string}) {
+		Utility.typeCheck(params, {token: "string", body: "string", orientation: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
-		var upload = Duvido.Upload.create(user, new Buffer(params.body, "binary"));
+		var image = Duvido.Image.create(user, parseInt(params.orientation), new Buffer(params.body, "binary"));
 		
 		resp.setHeader("Content-Type", "text/plain");
-		resp.write(upload.id);
+		resp.write(image.id);
 		resp.end();
 	}
 
@@ -161,7 +161,8 @@ class ApiV0 extends ApiBase {
 	post_challenge(resp : Http.ServerResponse, params : {token : string, title : string, description : string, reward : string,
 		                                                 targets : string, duration : string, image : string}) {
 		Utility.typeCheck(params, {
-			token: "string", title: "string", description: "string", reward: "string", targets: "string", duration: "string", image: "string"}, "params");
+			token: "string", title: "string", description: "string", reward: "string",
+			targets: "string", duration: "string", image: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var info : Duvido.Challenge.CreationInfo = {
@@ -171,7 +172,7 @@ class ApiV0 extends ApiBase {
 			reward: params.reward,
 			targets: params.targets.split(","),
 			duration: parseInt(params.duration),
-			image: params.image ? new Duvido.Upload(params.image) : null
+			image: params.image ? new Duvido.Image(params.image) : null
 		}
 		
 		var challenge = Duvido.Challenge.create(info);
@@ -195,7 +196,8 @@ class ApiV0 extends ApiBase {
 			description : string
 			reward : string
 			duration : number
-			image : string
+			imageId : string
+			videoId : string
 			targets : {
 				id : string
 				name : string
@@ -203,7 +205,8 @@ class ApiV0 extends ApiBase {
 				submissions : {
 					status : string // "waiting" | "accepted" | "rejected"
 					text : string
-					image : string
+					imageId : string
+					videoId : string
 					sentTime : string
 					judgedTime : string
 				}[]
@@ -212,6 +215,11 @@ class ApiV0 extends ApiBase {
 		
 		var user = Duvido.User.fromToken(params.token);
 		var challenges = Duvido.Challenge.listFromOwner(user);
+		
+		// Sort by creation date
+		challenges = challenges.sort((a, b) => {
+			return b.data.creationTime.getTime() - a.data.creationTime.getTime();
+		});
 		
 		// Collect all ids
 		var ids : string[] = [];
@@ -241,7 +249,8 @@ class ApiV0 extends ApiBase {
 				description: c.description,
 				reward: c.reward,
 				duration: c.duration,
-				image: c.image,
+				imageId: c.imageId,
+				videoId: c.videoId,
 				targets: c.targets.map(target => {return {
 					id: target.id,
 					name: names[target.id],
@@ -249,7 +258,8 @@ class ApiV0 extends ApiBase {
 					submissions: target.submissions.map(submission => {return {
 						status: submission.status,
 						text: submission.text,
-						image: submission.image,
+						imageId: submission.imageId,
+						videoId: submission.videoId,
 						sentTime: submission.sentTime.getTime()+"",
 						judgedTime: submission.judgedTime.getTime()+""
 					};})
@@ -280,7 +290,8 @@ class ApiV0 extends ApiBase {
 			description : string
 			reward : string
 			duration : number
-			image : string
+			imageId : string
+			videoId : string
 		}[] = [];
 		
 		var user = Duvido.User.fromToken(params.token);
@@ -313,7 +324,8 @@ class ApiV0 extends ApiBase {
 				description: c.description,
 				reward: c.reward,
 				duration: c.duration,
-				image: c.image
+				imageId: c.imageId,
+				videoId: c.videoId
 			});
 		});
 		

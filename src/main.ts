@@ -3,13 +3,16 @@ require("newrelic");
 import SourceMapSupport = require("source-map-support"); SourceMapSupport.install();
 import Server = require("./Server");
 import DB = require("./DB");
+import async = require("asyncawait/async");
 
 process.title = "duvidovc-api"
 
-DB.init(() => {
-
-var server = new Server(80, "0.0.0.0");
-
+async(() => {
+	
+	DB.init();
+	
+	var server = new Server(80, "0.0.0.0");
+	
 	process.on("SIGINT", () => {
 		console.log("\rRequested to shutdown.");
 		console.log("Waiting current operations to finish...");
@@ -17,4 +20,4 @@ var server = new Server(80, "0.0.0.0");
 		DB.close();
 	});
 
-});
+})();

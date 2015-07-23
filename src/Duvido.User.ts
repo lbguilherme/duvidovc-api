@@ -5,6 +5,7 @@ export = User;
 
 import DB = require("./DB");
 import Facebook = require("./Facebook");
+import Data = require("./Duvido.Data");
 import MongoDB = require("mongodb");
 import async = require("asyncawait/async");
 import InvalidTokenError = require("./InvalidTokenError");
@@ -71,17 +72,23 @@ class User {
 	}
 
 	getAvatar() {
-		var user = DB.users.findOne({id: this.id}, {_id: 0, avatar: 1});
-		if (user && user.avatar) {
-			var data : MongoDB.Binary = user.avatar;
-			var buff = data.read(0, data.length());
-			return buff;
-		} else {
-			var avatar = Facebook.getAvatar(this.id);
-			if (user)
-				DB.users.updateOneAsync({id: this.id}, {$set: {avatar: new MongoDB.Binary(avatar)}});
-			return avatar;
+		var user = DB.users.findOne({id: this.id}, {_id: 0, avatarDataId: 1});
+		if (user && user.avatarDataId) {
+			var entry = DB.data.findOne({id: user.avatarDataId}, {_id: 0, data: 1});
+			if (entry)
+				return entry.data.read(0, entry.data.length());
 		}
+		
+		var avatar = Facebook.getAvatar(this.id);
+		if (user) {
+			var data = Data.create(avatar);
+			data.incrementLinks();
+			DB.users.updateOneAsync({id: this.id}, {$set: {
+				avatarDataId: data.id
+			}});
+		}
+		
+		return avatar;
 	}
 
 	setFriendsAsync(friends : string[]) {

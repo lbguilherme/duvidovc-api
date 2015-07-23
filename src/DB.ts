@@ -1,42 +1,47 @@
 export = DB;
 
 import MongoDB = require("mongodb");
+import Bluebird = require("bluebird");
+import await = require("asyncawait/await");
+
+
+function connectDb(url : string) {
+	return await(new Bluebird.Promise<MongoDB.Db>((resolve, reject) => {
+		MongoDB.MongoClient.connect(url, (err, db) => {
+			if (err) reject(err); else resolve(db);
+		});
+	}));
+} 
 
 class DB {
 
-	static url = "mongodb://duvidovc.mongodb:27017/duvidovc";
-
-	static connectedCallback : () => void;
-	static db : MongoDB.Db;
+	static url = "mongodb://duvidovc.mongodb:27017/";
+	
+	static mainDb : MongoDB.Db;
+	static dataDb : MongoDB.Db;
+	
+	static data : DB.Collection<DB.Data>;
 	static users : DB.Collection<DB.User>;
 	static tokens : DB.Collection<DB.Token>;
 	static challenges : DB.Collection<DB.Challenge>;
-	static uploads : DB.Collection<DB.Upload>;
+	static images : DB.Collection<DB.Image>;
 
-	static init(callback : () => void) {
-		console.log("Connecting to database at '%s' ...", DB.url);
-		this.connectedCallback = callback;
-		MongoDB.MongoClient.connect(DB.url, this.onConnected.bind(this));
+	static init() {
+		DB.mainDb = connectDb(DB.url + "main");
+		DB.dataDb = connectDb(DB.url + "data");
+		
+		DB.data = new DB.Collection<DB.Data>(DB.dataDb.collection("data"));
+		DB.users = new DB.Collection<DB.User>(DB.mainDb.collection("users"));
+		DB.tokens = new DB.Collection<DB.Token>(DB.mainDb.collection("tokens"));
+		DB.challenges = new DB.Collection<DB.Challenge>(DB.mainDb.collection("challenges"));
+		DB.images = new DB.Collection<DB.Image>(DB.mainDb.collection("images"));
 	}
 
 	static close() {
-		this.db.close();
+		DB.mainDb.close();
+		DB.dataDb.close();
 	}
-
-	static onConnected(err : Error, db : MongoDB.Db) {
-		if (err) {
-			console.log("fatal: failed to connect to database: " + err.message);
-			return;
-		}
-
-		this.db = db;
-		this.users = new DB.Collection<DB.User>(db.collection("users"));
-		this.tokens = new DB.Collection<DB.Token>(db.collection("tokens"));
-		this.challenges = new DB.Collection<DB.Challenge>(db.collection("challenges"));
-		this.uploads = new DB.Collection<DB.Upload>(db.collection("uploads"));
-		this.connectedCallback();
-	}
-
+	
 }
 
 import DBCollection = require("./DB.Collection");
@@ -44,6 +49,13 @@ import DBCollection = require("./DB.Collection");
 module DB {
 	
 	export class Collection<T> extends DBCollection<T> {}
+	
+	export interface Data {
+		id : string
+		links : number
+		sha512 : string
+		data : MongoDB.Binary
+	}
 	
 	export interface Token {
 		token : string
@@ -54,7 +66,7 @@ module DB {
 	
 	export interface User {
 		id : string
-		avatar : MongoDB.Binary
+		avatarDataId : string
 		friends : string[]
 		name : string
 		firstName : string
@@ -64,11 +76,18 @@ module DB {
 		email : string
 	}
 	
-	export interface Upload {
-		time : Date
+	export interface Image {
 		id : string
+		links : number
+		time : Date
 		owner : string
-		data : MongoDB.Binary
+		width : number
+		height : number
+		type : string
+		sizes : {
+			width : number
+			dataId : string
+		}[]
 	}
 	
 	export interface Challenge {
@@ -79,14 +98,16 @@ module DB {
 		description : string
 		reward : string
 		duration : number
-		image? : string
+		imageId : string
+		videoId : string
 		targets : {
 			id : string
 			status : string // "sent" | "received" | "read" | "submitted" | "rewarded"
 			submissions : {
 				status : string // "waiting" | "accepted" | "rejected"
 				text : string
-				image : string
+				imageId : string
+				videoId : string
 				sentTime : Date
 				judgedTime : Date
 			}[]
