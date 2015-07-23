@@ -31,7 +31,7 @@ class User {
 					acceptableScopes = false;
 			});
 			
-			if (tokenInfo.expiresAt < new Date() && acceptableScopes) {
+			if (tokenInfo.expiresAt >= new Date() && acceptableScopes) {
 				return new User(tokenInfo.userId);
 			}
 		}
