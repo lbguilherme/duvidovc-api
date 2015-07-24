@@ -6,13 +6,13 @@ import await = require("asyncawait/await");
 import InputError = require("./InputError");
 
 export function readAll(msg : Http.IncomingMessage) {
-	return await(new Bluebird.Promise((resolve) => {
-		var contents = "";
-		msg.on("data", (data : string) => {
-			contents += data;
+	return await(new Bluebird.Promise<Buffer>((resolve) => {
+		var data : Buffer[] = [];
+		msg.on("data", (chunk : Buffer) => {
+			data.push(chunk);
 		});
 		msg.on("end", () => {
-			resolve(contents);
+			resolve(Buffer.concat(data));
 		});
 	}));
 }

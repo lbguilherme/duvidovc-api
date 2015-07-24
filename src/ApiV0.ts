@@ -135,11 +135,11 @@ class ApiV0 extends ApiBase {
 	 * 
 	 * Returns: Plaintext: the image id
 	 */
-	post_image(resp : Http.ServerResponse, params : {token : string, body : string, orientation : string}) {
-		Utility.typeCheck(params, {token: "string", body: "string", orientation: "string"}, "params");
+	post_image(resp : Http.ServerResponse, params : {token : string, body : Buffer, orientation : string}) {
+		Utility.typeCheck(params, {token: "string", orientation: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
-		var image = Duvido.Image.create(user, parseInt(params.orientation), new Buffer(params.body, "binary"));
+		var image = Duvido.Image.create(user, parseInt(params.orientation), params.body);
 		
 		resp.setHeader("Content-Type", "text/plain");
 		resp.write(image.id);
