@@ -40,8 +40,10 @@ class Server {
 	}
 	
 	private onRequest(msg : Http.IncomingMessage, resp : Http.ServerResponse) {
+		console.log(msg.url);
+			
 		async(() => {
-			console.log(msg.url);
+			
 			var ip = msg.headers["x-forwarded-for"] || msg.socket.remoteAddress;
 			var request = Url.parse(msg.url, true);
 			var path = request.pathname.split("/");
@@ -66,21 +68,24 @@ class Server {
 				return;
 			}
 			
-			try {
-				endpointFunction(resp, query);
-			} catch (e) {
-				if (e instanceof InputError)
-					resp.statusCode = 400; // Bad Request
-				else if (e instanceof InvalidTokenError)
-					resp.statusCode = 401; // Unauthorized
-				else
-					resp.statusCode = 500; // Unknown Error
-				
-				resp.setHeader("Content-Type", "text/plain");
-				resp.write(e.name + (e.message ? ": " + e.message : ""));
-				resp.end();
-			}
-		})();
+			endpointFunction(resp, query);
+			
+		})().error((e) => {
+			
+			if (e instanceof InputError)
+				resp.statusCode = 400; // Bad Request
+			else if (e instanceof InvalidTokenError)
+				resp.statusCode = 401; // Unauthorized
+			else
+				resp.statusCode = 500; // Unknown Error
+			
+			console.log(e.name + (e.message ? ": " + e.message : ""));
+			if (e.stack) console.log(e.stack);
+			resp.setHeader("Content-Type", "text/plain");
+			resp.write(e.name + (e.message ? ": " + e.message : ""));
+			resp.end();
+			
+		});
 	}
 
 	private onError(err : Error) {
