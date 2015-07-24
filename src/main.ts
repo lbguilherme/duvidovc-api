@@ -10,14 +10,6 @@ process.title = "duvidovc-api"
 async(() => {
 	
 	DB.init();
-	
-	var server = new Server(80, "0.0.0.0");
-	
-	process.on("SIGINT", () => {
-		console.log("\rRequested to shutdown.");
-		console.log("Waiting current operations to finish...");
-		server.stop();
-		DB.close();
-	});
+	new Server(80, "0.0.0.0");
 
 })();

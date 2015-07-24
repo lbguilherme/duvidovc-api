@@ -24,19 +24,10 @@ class Server {
 		this.server.listen(port, host, this.onStart.bind(this));
 	}
 
-	stop() {
-		console.log("Stopping server...");
-		this.server.close(this.onStop.bind(this));
-	}
-
 	private onStart() {
 		var host = this.server.address().address;
 		var port = this.server.address().port;
 		console.log("Listening at http://%s:%s", host, port);
-	}
-
-	private onStop() {
-		console.log("Server has been closed.");
 	}
 	
 	private onRequest(msg : Http.IncomingMessage, resp : Http.ServerResponse) {

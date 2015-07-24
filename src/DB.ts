@@ -36,11 +36,6 @@ class DB {
 		DB.challenges = new DB.Collection<DB.Challenge>(DB.mainDb.collection("challenges"));
 		DB.images = new DB.Collection<DB.Image>(DB.mainDb.collection("images"));
 	}
-
-	static close() {
-		DB.mainDb.close();
-		DB.dataDb.close();
-	}
 	
 }
 
