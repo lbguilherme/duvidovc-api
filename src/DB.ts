@@ -83,7 +83,6 @@ module DB {
 		owner : string
 		width : number
 		height : number
-		type : string
 		sizes : {
 			width : number
 			dataId : string

@@ -28,7 +28,6 @@ class Image {
 			links: 0,
 			time: new Date,
 			owner: owner.id,
-			type: "",
 			width: 0,
 			height: 0,
 			sizes: []
@@ -40,23 +39,11 @@ class Image {
 		var img = GM(data);
 		
 		await(new Bluebird.Promise((resolve, reject) => {
-			var tasks = 2;
-			function done() {
-				tasks -= 1;
-				if (tasks == 0)
-					resolve(null);
-			}
-			
 			img.size((err, size) => {
 				if (err) {reject(err); return;}
 				imageData.width = size.width;
 				imageData.height = size.height;
-				done();
-			});
-			img.format((err, type) => {
-				if (err) {reject(err); return;}
-				imageData.type = type;
-				done();
+				resolve(null);
 			});
 		}));
 		
