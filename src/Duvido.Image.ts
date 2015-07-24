@@ -48,13 +48,14 @@ class Image {
 		}));
 		
 		var toDoSizes : number[] = [imageData.width];
-		for (var w = 100; w < imageData.width; w *= 2)
+		for (var w = 250; w < imageData.width; w = (w*2.5)|0)
 			toDoSizes.push(w);
 			
 		await(toDoSizes.map(w => {
 			return new Bluebird.Promise<void>((resolve, reject) => {
 				var h = imageData.height/imageData.width*w;
-				img.scale(w, h).quality(80).toBuffer("JPEG", (err, buffer) => {
+				var scaled = w == imageData.width ? img : img.scale(w, h);
+				scaled.quality(70).toBuffer("JPEG", (err, buffer) => {
 					if (err) {reject(err); return;}
 					async(() => {
 						imageData.sizes.push({
