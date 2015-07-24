@@ -47,28 +47,21 @@ class Image {
 			});
 		}));
 		
-		var toDoSizes : number[] = [];
-		for (var w = 100; w < imageData.width; w = (w*1.5)|0)
+		var toDoSizes : number[] = [imageData.width];
+		for (var w = 100; w < imageData.width; w *= 2)
 			toDoSizes.push(w);
-		
-		await(new Bluebird.Promise((resolve, reject) => {
-			var tasks = toDoSizes.length;
-			function done() {
-				tasks -= 1;
-				if (tasks == 0)
-					resolve(null);
-			}
 			
-			toDoSizes.forEach(w => {
+		await(toDoSizes.map(w => {
+			return new Bluebird.Promise<void>((resolve, reject) => {
 				var h = imageData.height/imageData.width*w;
-				img.resize(w, h).toBuffer((err, buffer) => {
+				img.scale(w, h).quality(80).toBuffer("JPEG", (err, buffer) => {
 					if (err) {reject(err); return;}
 					async(() => {
 						imageData.sizes.push({
 							width: w,
 							dataId: Data.create(buffer).id
-						})
-					})().done(done, reject);
+						});
+					})().done(resolve, reject);
 				});
 			});
 		}));
