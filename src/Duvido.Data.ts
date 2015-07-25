@@ -42,4 +42,9 @@ class Data {
 	incrementLinks() {
 		DB.data.updateOne({id: this.id}, {$inc: {links: 1}});
 	}
+	
+	getBuffer() {
+		var entry = DB.data.findOne({id: this.id}, {_id: 0, data: 1});
+		return entry.data.read(0, entry.data.length());
+	}
 }

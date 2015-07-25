@@ -74,9 +74,9 @@ class User {
 	getAvatar() {
 		var user = DB.users.findOne({id: this.id}, {_id: 0, avatarDataId: 1});
 		if (user && user.avatarDataId) {
-			var entry = DB.data.findOne({id: user.avatarDataId}, {_id: 0, data: 1});
-			if (entry)
-				return entry.data.read(0, entry.data.length());
+			var data = new Data(user.avatarDataId);
+			if (data.exists())
+				return data.getBuffer();
 		}
 		
 		var avatar = Facebook.getAvatar(this.id);
