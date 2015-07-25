@@ -203,6 +203,31 @@ class ApiV0 extends ApiBase {
 		
 		Tracker.people.increment(user.id, "Images Sent");
 	}
+	
+	/**
+	 * GET /v0/image
+	 * - id: An image id
+	 * - size: A hint for the minimum size
+	 * 
+	 * Returns: BINARY
+	 * JPG encoded image.
+	 */
+	get_image(resp : Http.ServerResponse, params : {id : string, size : string}) {
+		Utility.typeCheck(params, {id: "string", size: "string"}, "params");
+		
+		var image = new Duvido.Image(params.id);
+		if (!image.exists()) {
+			resp.statusCode = 404;
+			resp.end();
+			return;
+		}
+		
+		var data = new Duvido.Data(image.getDataIdForSize(parseInt(params.size)));
+		
+		resp.setHeader("Content-Type", "image/jpeg");
+		resp.write(data.getBuffer());
+		resp.end();
+	}
 
 	/**
 	 * POST /v0/challenge

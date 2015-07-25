@@ -89,4 +89,18 @@ class Image {
 		var image = DB.images.findOne({id: this.id}, {_id: 0, owner: 1});
 		return image.owner;
 	}
+	
+	getDataIdForSize(size : number) {
+		var image = DB.images.findOne({id: this.id}, {_id: 0, sizes: 1});
+		var currentBest = image.sizes[0];
+		image.sizes.forEach(entry => {
+			if (entry.width < size && currentBest.width < entry.width)
+				currentBest = entry;
+			if (entry.width > size && currentBest.width < size)
+				currentBest = entry;
+			if (entry.width > size && currentBest.width > size && currentBest.width > entry.width)
+				currentBest = entry;
+		});
+		return currentBest.dataId;
+	}
 }
