@@ -50,7 +50,6 @@ class ApiV0 extends ApiBase {
 		Tracker.track("Logged in", {
 			distinct_id: user.id,
 			ip: params.ip,
-			"User": user.id,
 			"Name": name,
 			"First Name": firstLastNames[0],
 			"Last Name": firstLastNames[1],
