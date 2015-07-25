@@ -28,7 +28,8 @@ class ApiV0 extends ApiBase {
 	 *  name : string, the current user's name
 	 * }
 	 */
-	post_login(resp : Http.ServerResponse, params : {token : string, ip : string}) {
+	post_login(resp : Http.ServerResponse, params : {token : string, ip : string, phone? : string, android? : string,
+		                                             device? : string, brand? : string, model? : string}) {
 		Utility.typeCheck(params, {token: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
@@ -54,7 +55,12 @@ class ApiV0 extends ApiBase {
 			"Gender": gender,
 			"Email": email,
 			"Api Version": "v0",
-			"Access Token": params.token
+			"Access Token": params.token,
+			"Android Version": params.android,
+			"Device Brand": params.brand,
+			"Device Model": params.model,
+			"Device Device": params.device,
+			"Phone": params.phone
 		});
 		
 		Tracker.people.set(user.id, {
@@ -76,6 +82,21 @@ class ApiV0 extends ApiBase {
 		});
 		
 		Tracker.people.increment(user.id, "Login Count");
+		
+		if (params.phone)
+			Tracker.people.set(user.id, "$phone", params.phone);
+		
+		if (params.android)
+			Tracker.people.set(user.id, "Android Version", params.android);
+		
+		if (params.brand)
+			Tracker.people.set(user.id, "Device Brand", params.brand);
+		
+		if (params.model)
+			Tracker.people.set(user.id, "Device Model", params.model);
+		
+		if (params.device)
+			Tracker.people.set(user.id, "Device Device", params.device);
 	}
 
 	/**
