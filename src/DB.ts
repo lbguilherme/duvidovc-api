@@ -48,7 +48,6 @@ module DB {
 	export interface Data {
 		id : string
 		links : number
-		sha512 : string
 		data : MongoDB.Binary
 	}
 	
