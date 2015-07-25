@@ -7,8 +7,7 @@ import DB = require("./DB");
 import InputError = require("./InputError");
 import User = require("./Duvido.User");
 import MongoDB = require("mongodb");
-import UUID = require("node-uuid");
-import Crypto = require('crypto');
+import Crypto = require("crypto");
 
 class Data {
 	id : string;
@@ -21,14 +20,13 @@ class Data {
 		var hash = Crypto.createHash("sha512");
 		hash.update(data);
 		var sha512 = hash.digest("hex");
-		var existing = DB.data.findOne({sha512: sha512});
+		var existing = DB.data.findOne({id: sha512}, {_id: 1});
 		if (existing)
-			return new Data(existing.id);
+			return new Data(sha512);
 		
 		var entry : DB.Data = {
-			id: UUID.v4().replace(/-/g, ""),
+			id: sha512,
 			links: 0,
-			sha512: sha512,
 			data: new MongoDB.Binary(data)
 		};
 		
