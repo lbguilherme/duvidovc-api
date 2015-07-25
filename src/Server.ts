@@ -44,6 +44,7 @@ class Server {
 			var endpointMethod = method + endpoint.replace(/\//g, "_");
 			var query = request.query;
 			query.body = Utility.readAll(msg);
+			query.ip = ip;
 			
 			var api = ApiVersions[apiVersion];
 			if (!api) {
