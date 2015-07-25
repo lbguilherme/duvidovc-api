@@ -6,6 +6,7 @@ import Utility = require("./Utility");
 import Http = require("http");
 import await = require("asyncawait/await");
 import async = require("asyncawait/async");
+import Tracker = require("./Tracker");
 
 class ApiV0 extends ApiBase {
 	
@@ -25,33 +26,56 @@ class ApiV0 extends ApiBase {
 	 * {
 	 * 	id : string, the current user's id
 	 *  name : string, the current user's name
-	 *  firstName : string, the current user's first name
-	 *  lastName : string, the current user's last name
-	 *  birthday : string, the current user's birthday
-	 *  gender : string, the current user's gender
 	 * }
 	 */
-	post_login(resp : Http.ServerResponse, params : {token : string}) {
+	post_login(resp : Http.ServerResponse, params : {token : string, ip : string}) {
 		Utility.typeCheck(params, {token: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var name = user.getName(params.token);
+		
+		resp.setHeader("Content-Type", "application/json; charset=utf-8");
+		resp.write(JSON.stringify({id: user.id,	name: name}));
+		resp.end();
+		
 		var firstLastNames = user.getFirstLastName(params.token);
 		var birthday = user.getBirthday(params.token);
 		var gender = user.getGender(params.token);
 		var email = user.getEmail(params.token);
 		
-		resp.setHeader("Content-Type", "application/json; charset=utf-8");
-		resp.write(JSON.stringify({
-			id: user.id,
-			name: name,
-			firstName: firstLastNames[0],
-			lastName: firstLastNames[1],
-			birthday: birthday,
-			gender: gender,
-			email: email
-		}));
-		resp.end();
+		Tracker.track("Logged in", {
+			distinct_id: user.id,
+			ip: params.ip,
+			"User": user.id,
+			"Name": name,
+			"First Name": firstLastNames[0],
+			"Last Name": firstLastNames[1],
+			"Birthday": birthday.toISOString(),
+			"Gender": gender,
+			"Email": email,
+			"Api Version": "v0",
+			"Access Token": params.token
+		});
+		
+		Tracker.people.set(user.id, {
+			$ip: params.ip,
+			$username: user.id,
+			$name: name,
+			$first_name: firstLastNames[0],
+			$last_name: firstLastNames[1],
+			$email: email,
+			"Birthday": birthday.toISOString(),
+			"Age": user.getAge(params.token),
+			"Gender": gender,
+			"Access Token": params.token,
+			"Api Version": "v0"
+		});
+		
+		Tracker.people.set_once(user.id, {
+			$created: new Date().toISOString()
+		});
+		
+		Tracker.people.increment(user.id, "Login Count");
 	}
 
 	/**
