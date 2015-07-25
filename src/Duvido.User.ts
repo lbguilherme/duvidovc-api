@@ -171,6 +171,17 @@ class User {
 		}
 	}
 	
+	getAge(token : string) {
+	    var today = new Date();
+	    var birthday = this.getBirthday(token);
+	    var age = today.getFullYear() - birthday.getFullYear();
+	    var m = today.getMonth() - birthday.getMonth();
+	    if (m < 0 || (m === 0 && today.getDate() < birthday.getDate())) {
+	        age--;
+	    }
+	    return age;
+	}
+	
 	getGender(token : string) {
 		var user = DB.users.findOne({id : this.id}, {_id: 0, gender: 1});
 		if (user && user.gender) {
