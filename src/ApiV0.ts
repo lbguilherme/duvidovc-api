@@ -193,7 +193,7 @@ class ApiV0 extends ApiBase {
 	 * Returns: Nothing
 	 */
 	post_challenge(resp : Http.ServerResponse, params : {token : string, title : string, description : string, reward : string,
-		                                                 targets : string, duration : string, image : string}) {
+		                                                 targets : string, duration : string, image : string, ip : string}) {
 		Utility.typeCheck(params, {
 			token: "string", title: "string", description: "string", reward: "string",
 			targets: "string", duration: "string", image: "string"}, "params");
@@ -212,6 +212,25 @@ class ApiV0 extends ApiBase {
 		var challenge = Duvido.Challenge.create(info);
 		
 		resp.end();
+		
+		Tracker.track("Image uploaded", {
+			distinct_id: user.id,
+			ip: params.ip,
+			"Access Token": params.token,
+			"Challenge Id": challenge,
+			"Title": params.title,
+			"Description": params.description,
+			"Reward": params.reward,
+			"Targets": params.targets.split(","),
+			"Duration (s)": parseInt(params.duration),
+			"Image Id": params.image || null
+		});
+		
+		Tracker.people.increment(user.id, "Challenges Created");
+		
+		params.targets.split(",").forEach(target => {
+			Tracker.people.increment(target, "Challenges Received");
+		});
 	}
 	
 	/**
