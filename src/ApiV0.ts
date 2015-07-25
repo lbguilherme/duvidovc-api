@@ -58,7 +58,7 @@ class ApiV0 extends ApiBase {
 		});
 		
 		Tracker.people.set(user.id, {
-			$ip: params.ip,
+			ip: params.ip,
 			$username: user.id,
 			$name: name,
 			$first_name: firstLastNames[0],
