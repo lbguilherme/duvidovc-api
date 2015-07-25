@@ -29,8 +29,8 @@ class ApiV0 extends ApiBase {
 	 * }
 	 */
 	post_login(resp : Http.ServerResponse, params : {token : string, ip : string, api : string, phone? : string, android? : string,
-		                                             device? : string, brand? : string, model? : string, method : string}) {
-		Utility.typeCheck(params, {token: "string", method: "string"}, "params");
+		                                             device? : string, brand? : string, model? : string, method : string, version : string}) {
+		Utility.typeCheck(params, {token: "string", method: "string", version: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var name = user.getName(params.token);
@@ -63,7 +63,8 @@ class ApiV0 extends ApiBase {
 			"Device Model": params.model,
 			"Device Device": params.device,
 			"Phone": params.phone,
-			"Login Method": params.method
+			"Login Method": params.method,
+			"App Version": params.version
 		});
 		
 		Tracker.people.set(user.id, {
@@ -83,7 +84,8 @@ class ApiV0 extends ApiBase {
 			"Device Model": params.model,
 			"Device Device": params.device,
 			"$phone": params.phone,
-			"Facebook App": /app/i.test(params.method) ? "Yes" : "No"
+			"Facebook App": /app/i.test(params.method) ? "Yes" : "No",
+			"App Version": params.version
 		});
 		
 		Tracker.people.set_once(user.id, {
