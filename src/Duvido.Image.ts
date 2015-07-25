@@ -43,7 +43,7 @@ class Image {
 		if (orientation % 90 != 0)
 			throw new InputError("Invalid orientation");
 			
-		var img = GM(data);
+		var img = GM.subClass({nativeAutoOrient: true})(data);
 		
 		await(new Bluebird.Promise((resolve, reject) => {
 			img.size((err, size) => {
@@ -55,14 +55,14 @@ class Image {
 		}));
 		
 		var toDoSizes : number[] = [imageData.width];
-		for (var w = 250; w < imageData.width; w = (w*2.5)|0)
+		for (var w = 250; w < imageData.width; w = (w*1.8)|0)
 			toDoSizes.push(w);
 			
 		await(toDoSizes.map(w => {
 			return new Bluebird.Promise<void>((resolve, reject) => {
-				var h = imageData.height/imageData.width*w;
-				var scaled = w == imageData.width ? img : img.scale(w, h);
-				scaled.quality(70).toBuffer("JPEG", (err, buffer) => {
+				var out = img.autoOrient().rotate("white", orientation);
+				if (w != imageData.width) out = out.scale(w, 9999);
+				out.quality(70).toBuffer("JPEG", (err, buffer) => {
 					if (err) {reject(err); return;}
 					async(() => {
 						var data = Data.create(buffer);
