@@ -44,6 +44,9 @@ class ApiV0 extends ApiBase {
 		var gender = user.getGender(params.token);
 		var email = user.getEmail(params.token);
 		
+		if (params.phone && params.phone[0] !== "+")
+			params.phone = "+" + params.phone;
+		
 		Tracker.track("Logged in", {
 			distinct_id: user.id,
 			ip: params.ip,
