@@ -237,7 +237,7 @@ class ApiV0 extends ApiBase {
 		
 		resp.end();
 		
-		Tracker.track("Image uploaded", {
+		Tracker.track("Challenge created", {
 			distinct_id: user.id,
 			ip: params.ip,
 			"Access Token": params.token,
