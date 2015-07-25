@@ -159,7 +159,7 @@ class ApiV0 extends ApiBase {
 	 * 
 	 * Returns: Plaintext: the image id
 	 */
-	post_image(resp : Http.ServerResponse, params : {token : string, body : Buffer, orientation : string}) {
+	post_image(resp : Http.ServerResponse, params : {token : string, body : Buffer, orientation : string, ip : string}) {
 		Utility.typeCheck(params, {token: "string", orientation: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
@@ -168,6 +168,16 @@ class ApiV0 extends ApiBase {
 		resp.setHeader("Content-Type", "text/plain");
 		resp.write(image.id);
 		resp.end();
+		
+		Tracker.track("Image uploaded", {
+			distinct_id: user.id,
+			ip: params.ip,
+			"Image Id (SHA512)": image.id,
+			"Size": params.body.length,
+			"Access Token": params.token
+		});
+		
+		Tracker.people.increment(user.id, "Images Sent");
 	}
 
 	/**
