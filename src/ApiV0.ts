@@ -78,6 +78,11 @@ class ApiV0 extends ApiBase {
 			"Gender": gender,
 			"Access Token": params.token,
 			"Api Version": "v0",
+			"Android Version": params.android,
+			"Device Brand": params.brand,
+			"Device Model": params.model,
+			"Device Device": params.device,
+			"$phone": params.phone,
 			"Facebook App": /app/i.test(params.method) ? "Yes" : "No"
 		});
 		
@@ -86,21 +91,6 @@ class ApiV0 extends ApiBase {
 		});
 		
 		Tracker.people.increment(user.id, "Login Count");
-		
-		if (params.phone)
-			Tracker.people.set(user.id, "$phone", params.phone);
-		
-		if (params.android)
-			Tracker.people.set(user.id, "Android Version", params.android);
-		
-		if (params.brand)
-			Tracker.people.set(user.id, "Device Brand", params.brand);
-		
-		if (params.model)
-			Tracker.people.set(user.id, "Device Model", params.model);
-		
-		if (params.device)
-			Tracker.people.set(user.id, "Device Device", params.device);
 	}
 
 	/**
