@@ -9,11 +9,11 @@ import InputError = require("./InputError");
 import User = require("./Duvido.User");
 import Data = require("./Duvido.Data");
 import MongoDB = require("mongodb");
-import UUID = require("node-uuid");
 import GM = require("gm");
 import Bluebird = require("bluebird");
 import await = require("asyncawait/await");
 import async = require("asyncawait/async");
+import Crypto = require("crypto");
 
 class Image {
 	id : string;
@@ -23,8 +23,11 @@ class Image {
 	}
 	
 	static create(owner : User, orientation : number, data : Buffer) {
+		var hash = Crypto.createHash("sha512");
+		hash.update(data);
+		var sha512 = hash.digest("hex");
 		var imageData : DB.Image = {
-			id: UUID.v4().replace(/-/g, ""),
+			id: sha512,
 			links: 0,
 			time: new Date,
 			owner: owner.id,
