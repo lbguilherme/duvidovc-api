@@ -65,9 +65,11 @@ class Image {
 				scaled.quality(70).toBuffer("JPEG", (err, buffer) => {
 					if (err) {reject(err); return;}
 					async(() => {
+						var data = Data.create(buffer);
+						data.incrementLinks();
 						imageData.sizes.push({
 							width: w,
-							dataId: Data.create(buffer).id
+							dataId: data.id
 						});
 					})().done(resolve, reject);
 				});
