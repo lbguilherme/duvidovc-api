@@ -26,6 +26,10 @@ class Image {
 		var hash = Crypto.createHash("sha512");
 		hash.update(data);
 		var sha512 = hash.digest("hex");
+		var existing = DB.images.findOne({id: sha512}, {_id: 1});
+		if (existing)
+			return new Image(sha512);
+		
 		var imageData : DB.Image = {
 			id: sha512,
 			links: 0,
