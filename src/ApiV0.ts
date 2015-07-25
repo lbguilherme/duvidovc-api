@@ -28,7 +28,7 @@ class ApiV0 extends ApiBase {
 	 *  name : string, the current user's name
 	 * }
 	 */
-	post_login(resp : Http.ServerResponse, params : {token : string, ip : string, phone? : string, android? : string,
+	post_login(resp : Http.ServerResponse, params : {token : string, ip : string, api : string, phone? : string, android? : string,
 		                                             device? : string, brand? : string, model? : string}) {
 		Utility.typeCheck(params, {token: "string"}, "params");
 		
@@ -54,7 +54,7 @@ class ApiV0 extends ApiBase {
 			"Birthday": birthday.toISOString(),
 			"Gender": gender,
 			"Email": email,
-			"Api Version": "v0",
+			"Api Version": params.api,
 			"Access Token": params.token,
 			"Android Version": params.android,
 			"Device Brand": params.brand,

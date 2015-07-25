@@ -45,6 +45,7 @@ class Server {
 			var query = request.query;
 			query.body = Utility.readAll(msg);
 			query.ip = ip;
+			query.api = apiVersion;
 			
 			var api = ApiVersions[apiVersion];
 			if (!api) {
