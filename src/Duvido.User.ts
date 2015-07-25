@@ -163,11 +163,11 @@ class User {
 	getBirthday(token : string) {
 		var user = DB.users.findOne({id : this.id}, {_id: 0, birthday: 1});
 		if (user && user.birthday) {
-			return user.birthday;
+			return new Date(user.birthday);
 		} else {
 			var userInfo = Facebook.getUser(token, this.id);
 			this.setFromFacebookUser(userInfo);
-			return userInfo.birthday;
+			return new Date(userInfo.birthday);
 		}
 	}
 	
