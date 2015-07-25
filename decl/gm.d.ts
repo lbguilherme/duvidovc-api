@@ -611,6 +611,7 @@ declare module "gm" {
 
 		export interface SubClass {
 			(image: string): State;
+			(source: Buffer, image?: string): m.State;
 		}
 
 		export function compare(filename1: string, filename2: string, callback: CompareCallback): void;
