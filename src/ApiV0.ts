@@ -6,7 +6,7 @@ import Utility = require("./Utility");
 import Http = require("http");
 import await = require("asyncawait/await");
 import async = require("asyncawait/async");
-import Tracker = require("./Tracker");
+import Mixpanel = require("./Mixpanel");
 
 class ApiV0 extends ApiBase {
 	
@@ -47,9 +47,10 @@ class ApiV0 extends ApiBase {
 		
 		if (params.phone && params.phone[0] !== "+")
 			params.phone = "+" + params.phone;
+			
+		var profile = new Mixpanel.Profile(user.id);
 		
-		Tracker.track("Logged in", {
-			distinct_id: user.id,
+		profile.track("Logged in", {
 			ip: params.ip,
 			"Name": name,
 			"First Name": firstLastNames[0],
@@ -71,8 +72,7 @@ class ApiV0 extends ApiBase {
 			"Screen Height": parseInt(params.height)
 		});
 		
-		Tracker.people.set(user.id, {
-			ip: params.ip,
+		profile.set({
 			$username: user.id,
 			$name: name,
 			$first_name: firstLastNames[0],
@@ -95,11 +95,8 @@ class ApiV0 extends ApiBase {
 			"Screen Height": parseInt(params.height)
 		});
 		
-		Tracker.people.set_once(user.id, {
-			$created: new Date().toISOString()
-		});
-		
-		Tracker.people.increment(user.id, "Login Count");
+		profile.setOnce({$created: new Date()});
+		profile.add({"Login Count": 1});
 	}
 
 	/**
@@ -193,15 +190,15 @@ class ApiV0 extends ApiBase {
 		resp.write(image.id);
 		resp.end();
 		
-		Tracker.track("Image uploaded", {
-			distinct_id: user.id,
+		var profile = new Mixpanel.Profile(user.id);
+		profile.track("Image uploaded", {
 			ip: params.ip,
 			"Image Id (SHA512)": image.id,
 			"Size": params.body.length,
 			"Access Token": params.token
 		});
 		
-		Tracker.people.increment(user.id, "Images Sent");
+		profile.add({"Images Sent": 1});
 	}
 	
 	/**
@@ -262,8 +259,9 @@ class ApiV0 extends ApiBase {
 		
 		resp.end();
 		
-		Tracker.track("Challenge created", {
-			distinct_id: user.id,
+		var profile = new Mixpanel.Profile(user.id);
+		
+		profile.track("Challenge created", {
 			ip: params.ip,
 			"Access Token": params.token,
 			"Challenge Id": challenge,
@@ -275,10 +273,11 @@ class ApiV0 extends ApiBase {
 			"Image Id": params.image || null
 		});
 		
-		Tracker.people.increment(user.id, "Challenges Created");
+		profile.add({"Challenges Created": 1});
 		
 		params.targets.split(",").forEach(target => {
-			Tracker.people.increment(target, "Challenges Received");
+			var targetProfile = new Mixpanel.Profile(user.id, false);
+			targetProfile.add({"Challenges Received": 1});
 		});
 	}
 	
