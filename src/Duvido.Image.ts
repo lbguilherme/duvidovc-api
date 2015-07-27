@@ -103,4 +103,9 @@ class Image {
 		});
 		return currentBest.dataId;
 	}
+	
+	getRatio() {
+		var image = DB.images.findOne({id: this.id}, {_id: 0, width: 1, height: 1});
+		return image.width / image.height;
+	}
 }

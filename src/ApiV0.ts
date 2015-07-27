@@ -393,6 +393,7 @@ class ApiV0 extends ApiBase {
 			duration : number
 			imageId : string
 			videoId : string
+			ratio : number
 		}[] = [];
 		
 		var user = Duvido.User.fromToken(params.token);
@@ -400,17 +401,29 @@ class ApiV0 extends ApiBase {
 		
 		// Collect all ids
 		var ids : string[] = [];
+		var imageIds : string[] = [];
 		challenges.forEach(challenge => {
 			var id = challenge.data.owner;
 			if (ids.indexOf(id) == -1)
 				ids.push(id);
+			var imageId = challenge.data.imageId;
+			if (imageId && imageIds.indexOf(imageId) == -1)
+				imageIds.push(imageId);
 		});
 		
-		// Fetch the name of each id
+		// Fetch the name of each user
 		var names : {[id : string] : string} = {};
 		await(ids.map(id => {
 			return async(() => {
 				names[id] = new Duvido.User(id).getName(params.token);
+			})();
+		}));
+		
+		// Fetch the ratio of each image
+		var ratios : {[imageId : string] : number} = {};
+		await(imageIds.map(imageId => {
+			return async(() => {
+				ratios[imageId] = new Duvido.Image(imageId).getRatio();
 			})();
 		}));
 		
@@ -426,7 +439,8 @@ class ApiV0 extends ApiBase {
 				reward: c.reward,
 				duration: c.duration,
 				imageId: c.imageId,
-				videoId: c.videoId
+				videoId: c.videoId,
+				ratio: ratios[c.imageId]
 			});
 		});
 		
