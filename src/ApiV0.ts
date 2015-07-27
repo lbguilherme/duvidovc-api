@@ -57,7 +57,7 @@ class ApiV0 extends ApiBase {
 			"Birthday": birthday.toISOString().substr(0, 10),
 			"Gender": gender,
 			"Email": email,
-			"Api Version": params.api,
+			"Api Version": parseInt(params.api.substr(1)),
 			"Access Token": params.token,
 			"Android Version": params.android,
 			"Device Brand": params.brand,
@@ -66,9 +66,9 @@ class ApiV0 extends ApiBase {
 			"Phone": params.phone,
 			"Login Method": params.method,
 			"App Version": params.version,
-			"Screen DPI": params.dpi,
-			"Screen Width": params.width,
-			"Screen Height": params.height
+			"Screen DPI": parseFloat(params.dpi),
+			"Screen Width": parseInt(params.width),
+			"Screen Height": parseInt(params.height)
 		});
 		
 		Tracker.people.set(user.id, {
@@ -83,16 +83,16 @@ class ApiV0 extends ApiBase {
 			"Age": user.getAge(params.token),
 			"Gender": gender,
 			"Access Token": params.token,
-			"Api Version": "v0",
+			"Api Version": parseInt(params.api.substr(1)),
 			"Android Version": params.android,
 			"Device Brand": params.brand,
 			"Device Model": params.model,
 			"Device Name": params.device,
 			"Facebook App": /app/i.test(params.method) ? "Yes" : "No",
 			"App Version": params.version,
-			"Screen DPI": params.dpi,
-			"Screen Width": params.width,
-			"Screen Height": params.height
+			"Screen DPI": parseFloat(params.dpi),
+			"Screen Width": parseInt(params.width),
+			"Screen Height": parseInt(params.height)
 		});
 		
 		Tracker.people.set_once(user.id, {
