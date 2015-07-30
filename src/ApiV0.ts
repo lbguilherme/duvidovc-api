@@ -30,7 +30,7 @@ class ApiV0 extends ApiBase {
 	 */
 	post_login(resp : Http.ServerResponse, params : {token : string, ip : string, api : string, phone? : string, android? : string,
 		                                             device? : string, brand? : string, model? : string, method : string, version : string,
-													 dpi : string, width : string, height : string}) {
+													 dpi : string, width : string, height : string, deviceid : string, playservices : string}) {
 		Utility.typeCheck(params, {token: "string", method: "string", version: "string", dpi: "string", width: "string", height: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
@@ -64,6 +64,7 @@ class ApiV0 extends ApiBase {
 			"Device Brand": params.brand,
 			"Device Model": params.model,
 			"Device Name": params.device,
+			"Device Id": params.deviceid,
 			"Phone": params.phone,
 			"Login Method": params.method,
 			"App Version": params.version,
@@ -88,7 +89,9 @@ class ApiV0 extends ApiBase {
 			"Device Brand": params.brand,
 			"Device Model": params.model,
 			"Device Name": params.device,
+			"Device Id": params.deviceid,
 			"Facebook App": /app/i.test(params.method) ? "Yes" : "No",
+			"Google Play Services": params.playservices,
 			"App Version": params.version,
 			"Screen DPI": parseFloat(params.dpi),
 			"Screen Width": parseInt(params.width),
