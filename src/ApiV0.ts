@@ -98,6 +98,18 @@ class ApiV0 extends ApiBase {
 		profile.setOnce({$created: new Date()});
 		profile.add({"Login Count": 1});
 	}
+	
+	post_gcm(resp : Http.ServerResponse, params : {gcmToken : string, token : string}) {
+		Utility.typeCheck(params, {gcmToken: "string", token: "string"}, "params");
+		
+		var user = Duvido.User.fromToken(params.token);
+		user.addGcmToken(params.gcmToken);
+		
+		var profile = new Mixpanel.Profile(user.id);
+		profile.union({$android_devices : [params.gcmToken]});
+		
+		resp.end();
+	}
 
 	/**
 	 * GET /v0/avatar

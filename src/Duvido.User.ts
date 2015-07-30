@@ -203,4 +203,11 @@ class User {
 			return userInfo.email;
 		}
 	}
+	
+	addGcmToken(gcmToken : string) {
+		DB.users.updateOne({id: this.id}, {
+			$set: {id: this.id},
+			$addToSet: {gcmTokens: gcmToken}
+		});
+	}
 }
