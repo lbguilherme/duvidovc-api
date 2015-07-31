@@ -68,6 +68,7 @@ module DB {
 		gender : string
 		birthday : string
 		email : string
+		gcmTokens : string[]
 	}
 	
 	export interface Image {
