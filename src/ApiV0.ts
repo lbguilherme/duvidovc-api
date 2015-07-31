@@ -291,7 +291,7 @@ class ApiV0 extends ApiBase {
 		profile.add({"Challenges Created": 1});
 		
 		params.targets.split(",").forEach(target => {
-			var targetProfile = new Mixpanel.Profile(user.id, false);
+			var targetProfile = new Mixpanel.Profile(target, false);
 			targetProfile.add({"Challenges Received": 1});
 		});
 	}
