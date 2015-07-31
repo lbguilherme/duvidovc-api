@@ -7,6 +7,7 @@ import Http = require("http");
 import await = require("asyncawait/await");
 import async = require("asyncawait/async");
 import Mixpanel = require("./Mixpanel");
+import Notification = require("./Notification");
 
 class ApiV0 extends ApiBase {
 	
@@ -290,9 +291,19 @@ class ApiV0 extends ApiBase {
 		
 		profile.add({"Challenges Created": 1});
 		
+		var name = user.getName(params.token);
+		
 		params.targets.split(",").forEach(target => {
 			var targetProfile = new Mixpanel.Profile(target, false);
 			targetProfile.add({"Challenges Received": 1});
+			
+			var notification = new Notification(new Duvido.User(target));
+			notification.setData({
+				type: "basic-forward",
+				title: "Você foi desafiado por " + name,
+				body: params.title
+			});
+			notification.send();
 		});
 	}
 	
