@@ -210,4 +210,9 @@ class User {
 			$addToSet: {gcmTokens: gcmToken}
 		});
 	}
+	
+	getGcmTokens() : string[] {
+		var user = DB.users.findOne({id : this.id}, {_id: 0, gcmTokens: 1});
+		return user.gcmTokens || [];
+	}
 }
