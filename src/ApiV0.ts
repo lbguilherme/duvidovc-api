@@ -256,10 +256,10 @@ class ApiV0 extends ApiBase {
 	 * Returns: Nothing
 	 */
 	post_challenge(resp : Http.ServerResponse, params : {token : string, title : string, description : string, reward : string,
-		                                                 targets : string, duration : string, image : string, ip : string}) {
+		                                                 targets : string, duration : string, imageId? : string, ip : string}) {
 		Utility.typeCheck(params, {
 			token: "string", title: "string", description: "string", reward: "string",
-			targets: "string", duration: "string", image: "string"}, "params");
+			targets: "string", duration: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var info : Duvido.Challenge.CreationInfo = {
@@ -269,7 +269,7 @@ class ApiV0 extends ApiBase {
 			reward: params.reward,
 			targets: params.targets.split(","),
 			duration: parseInt(params.duration),
-			image: params.image ? new Duvido.Image(params.image) : null
+			image: params.imageId ? new Duvido.Image(params.imageId) : null
 		}
 		
 		var challenge = Duvido.Challenge.create(info);
@@ -287,7 +287,7 @@ class ApiV0 extends ApiBase {
 			"Reward": params.reward,
 			"Targets": params.targets.split(","),
 			"Duration (s)": parseInt(params.duration),
-			"Image Id": params.image || null
+			"Image Id": params.imageId || null
 		});
 		
 		profile.add({"Challenges Created": 1});
