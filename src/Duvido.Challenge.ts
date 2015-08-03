@@ -95,4 +95,19 @@ class Challenge {
 		else
 			return this.data = DB.challenges.findOne({id: this.id}, {_id: 0});
 	}
+	
+	refuse(user : User) {
+		var challenge = DB.challenges.findOne({id: this.id}, {_id: 0, targets: 1});
+		
+		if (!challenge)
+			return;
+		
+		challenge.targets.forEach(target => {
+			if (target.id == user.id && target.status == "received") {
+				target.status = "refused";
+			}
+		});
+		
+		DB.challenges.updateOne({id: this.id}, challenge);
+	}
 }

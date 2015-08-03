@@ -480,4 +480,29 @@ class ApiV0 extends ApiBase {
 		resp.write(JSON.stringify(infos));
 		resp.end();
 	}
+	
+	/**
+	 * POST /v0/refuse
+	 * - token: The owner token
+	 * - id: challenge id
+	 */
+	post_refuse(resp : Http.ServerResponse, params : {token : string, id : string, ip : string}) {
+		Utility.typeCheck(params, {token: "string", id: "string"}, "params");
+		
+		var challenge = new Duvido.Challenge(params.id);
+		var user = Duvido.User.fromToken(params.token);
+		challenge.refuse(user);
+		
+		resp.end();
+		
+		var profile = new Mixpanel.Profile(user.id);
+		profile.track("Challenge refused", {
+			ip: params.ip,
+			"Challenge Id": challenge.id,
+			"Access Token": params.token,
+			"Challenge Owner": challenge.getData().owner
+		});
+		
+		profile.add({"Challenge Refused": 1});
+	}
 }
