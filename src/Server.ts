@@ -36,7 +36,7 @@ class Server {
 		async(() => {
 			
 			var ip = msg.headers["x-forwarded-for"] || msg.socket.remoteAddress;
-			var request = Url.parse(msg.url, true);
+			var request = Url.parse(msg.url.replace(/\+/g, "%2B"), true);
 			var path = request.pathname.split("/");
 			var apiVersion = path[1];
 			var method = msg.method.toLowerCase()
