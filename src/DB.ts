@@ -96,7 +96,7 @@ module DB {
 		videoId : string
 		targets : {
 			id : string
-			status : string // "sent" | "received" | "read" | "submitted" | "rewarded"
+			status : string // "sent" | "received" | "submitted" | "rewarded" | "refused"
 			submissions : {
 				status : string // "waiting" | "accepted" | "rejected"
 				text : string
