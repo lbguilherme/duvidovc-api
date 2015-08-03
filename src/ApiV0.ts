@@ -75,6 +75,7 @@ class ApiV0 extends ApiBase {
 		});
 		
 		profile.set({
+			$ip: params.ip,
 			$username: user.id,
 			$name: name,
 			$first_name: firstLastNames[0],
