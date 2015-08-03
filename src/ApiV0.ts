@@ -425,6 +425,11 @@ class ApiV0 extends ApiBase {
 		var user = Duvido.User.fromToken(params.token);
 		var challenges = Duvido.Challenge.listFromTarget(user);
 		
+		// Sort by creation date
+		challenges = challenges.sort((a, b) => {
+			return b.data.creationTime.getTime() - a.data.creationTime.getTime();
+		});
+		
 		// Collect all ids
 		var ids : string[] = [];
 		var imageIds : string[] = [];
