@@ -81,7 +81,7 @@ class Challenge {
 	}
 	
 	static listFromTarget(target : User) {
-		var list = DB.challenges.list({"targets.id": target.id}, {_id: 0});
+		var list = DB.challenges.list({targets: {$elemMatch: {$and: [{id: target.id}, {$or: [{status: "sent"}, {status: "received"}]}]}}}, {_id: 0});
 		return list.map(data => {
 			var challenge = new Challenge(data.id);
 			challenge.data = data
