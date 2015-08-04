@@ -80,12 +80,24 @@ class Challenge {
 		});
 	}
 	
-	static listFromTarget(target : User) {
-		var list = DB.challenges.list({targets: {$elemMatch: {$and: [{id: target.id}, {$or: [{status: "sent"}, {status: "received"}]}]}}}, {_id: 0});
+	static listFromTarget(user : User) {
+		var list = DB.challenges.list({targets: {$elemMatch: {$and: [{id: user.id}, {$or: [{status: "sent"}, {status: "received"}]}]}}}, {_id: 0});
 		return list.map(data => {
 			var challenge = new Challenge(data.id);
 			challenge.data = data
 			return challenge;
+		});
+	}
+	
+	static markAllFromTargetAsReceivedAsync(user : User) {
+		var list = DB.challenges.list({targets: {$elemMatch: {$and: [{id: user.id}, {$or: [{status: "sent"}]}]}}}, {_id: 0});
+		list.forEach(challenge => {
+			challenge.targets.forEach(target => {
+				if (target.id == user.id && target.status == "sent") {
+					target.status = "received";
+				}
+			});
+			DB.challenges.updateOneAsync({id: challenge.id}, {$set: {targets: challenge.targets}});
 		});
 	}
 	

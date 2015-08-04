@@ -424,6 +424,7 @@ class ApiV0 extends ApiBase {
 		}[] = [];
 		
 		var user = Duvido.User.fromToken(params.token);
+		Duvido.Challenge.markAllFromTargetAsReceivedAsync(user);
 		var challenges = Duvido.Challenge.listFromTarget(user);
 		
 		// Sort by creation date
