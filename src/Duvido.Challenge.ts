@@ -103,7 +103,7 @@ class Challenge {
 			return;
 		
 		challenge.targets.forEach(target => {
-			if (target.id == user.id && target.status == "received") {
+			if (target.id == user.id && (target.status == "received" || target.status == "sent")) {
 				target.status = "refused";
 			}
 		});
