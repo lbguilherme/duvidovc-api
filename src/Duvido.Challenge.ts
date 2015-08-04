@@ -108,6 +108,6 @@ class Challenge {
 			}
 		});
 		
-		DB.challenges.updateOne({id: this.id}, challenge);
+		DB.challenges.updateOne({id: this.id}, {$set: {targets: challenge.targets}});
 	}
 }
