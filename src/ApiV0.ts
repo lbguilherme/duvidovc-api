@@ -504,6 +504,6 @@ class ApiV0 extends ApiBase {
 			"Challenge Owner": challenge.getData().owner
 		});
 		
-		profile.add({"Challenge Refused": 1});
+		profile.add({"Challenges Refused": 1});
 	}
 }
