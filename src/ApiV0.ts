@@ -272,7 +272,7 @@ class ApiV0 extends ApiBase {
 			image: params.imageId ? new Duvido.Image(params.imageId) : null
 		}
 		
-		var challenge = Duvido.Challenge.create(info);
+		var challengeId = Duvido.Challenge.create(info);
 		
 		resp.end();
 		
@@ -281,7 +281,7 @@ class ApiV0 extends ApiBase {
 		profile.track("Challenge created", {
 			ip: params.ip,
 			"Access Token": params.token,
-			"Challenge Id": challenge,
+			"Challenge Id": challengeId,
 			"Title": params.title,
 			"Description": params.description,
 			"Reward": params.reward,
