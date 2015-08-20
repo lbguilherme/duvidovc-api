@@ -330,14 +330,6 @@ class ApiV0 extends ApiBase {
 				id : string
 				name : string
 				status : string // "sent" | "received" | "read" | "submitted" | "rewarded"
-				submissions : {
-					status : string // "waiting" | "accepted" | "rejected"
-					text : string
-					imageId : string
-					videoId : string
-					sentTime : string
-					judgedTime : string
-				}[]
 			}[]
 		}[] = [];
 		
