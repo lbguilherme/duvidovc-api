@@ -338,7 +338,7 @@ class ApiV0 extends ApiBase {
 		
 		// Sort by creation date
 		challenges = challenges.sort((a, b) => {
-			return b.data.creationTime.getTime() - a.data.creationTime.getTime();
+			return b.getData().time.getTime() - a.getData().time.getTime();
 		});
 		
 		// Collect all ids
@@ -421,7 +421,7 @@ class ApiV0 extends ApiBase {
 		
 		// Sort by creation date
 		challenges = challenges.sort((a, b) => {
-			return b.data.creationTime.getTime() - a.data.creationTime.getTime();
+			return b.getData().time.getTime() - a.getData().time.getTime();
 		});
 		
 		// Collect all ids
