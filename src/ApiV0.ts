@@ -255,17 +255,17 @@ class ApiV0 extends ApiBase {
 	 * 
 	 * Returns: Nothing
 	 */
-	post_challenge(resp : Http.ServerResponse, params : {token : string, title : string, description : string, reward : string,
+	post_challenge(resp : Http.ServerResponse, params : {token : string, title : string, details : string, reward : string,
 		                                                 targets : string, duration : string, imageId? : string, ip : string}) {
 		Utility.typeCheck(params, {
-			token: "string", title: "string", description: "string", reward: "string",
+			token: "string", title: "string", details: "string", reward: "string",
 			targets: "string", duration: "string"}, "params");
 		
 		var user = Duvido.User.fromToken(params.token);
 		var info : Duvido.Challenge.CreationInfo = {
 			owner: user.id,
 			title: params.title,
-			description: params.description,
+			details: params.details,
 			reward: params.reward,
 			targets: params.targets.split(","),
 			duration: parseInt(params.duration),
@@ -283,7 +283,7 @@ class ApiV0 extends ApiBase {
 			"Access Token": params.token,
 			"Challenge Id": challengeId,
 			"Title": params.title,
-			"Description": params.description,
+			"Details": params.details,
 			"Reward": params.reward,
 			"Targets": params.targets.split(","),
 			"Duration (s)": parseInt(params.duration),
@@ -321,7 +321,7 @@ class ApiV0 extends ApiBase {
 			id : string
 			creationTime : string
 			title : string
-			description : string
+			details : string
 			reward : string
 			duration : number
 			imageId : string
@@ -374,7 +374,7 @@ class ApiV0 extends ApiBase {
 				id: c.id,
 				creationTime: c.creationTime.getTime()+"",
 				title: c.title,
-				description: c.description,
+				details: c.details,
 				reward: c.reward,
 				duration: c.duration,
 				imageId: c.imageId,
@@ -415,7 +415,7 @@ class ApiV0 extends ApiBase {
 			creationTime : string
 			owner : {id : string, name : string}
 			title : string
-			description : string
+			details : string
 			reward : string
 			duration : number
 			imageId : string
@@ -468,7 +468,7 @@ class ApiV0 extends ApiBase {
 				creationTime: c.creationTime.getTime()+"",
 				owner: {id : c.owner, name: names[c.owner]},
 				title: c.title,
-				description: c.description,
+				details: c.details,
 				reward: c.reward,
 				duration: c.duration,
 				imageId: c.imageId,
