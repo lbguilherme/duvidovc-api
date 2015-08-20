@@ -31,8 +31,6 @@ class Server {
 	}
 	
 	private onRequest(msg : Http.IncomingMessage, resp : Http.ServerResponse) {
-		console.log(msg.url);
-			
 		async(() => {
 			
 			var ip = msg.headers["x-forwarded-for"] || msg.socket.remoteAddress;
@@ -46,6 +44,9 @@ class Server {
 			query.body = Utility.readAll(msg);
 			query.ip = ip;
 			query.api = apiVersion;
+			
+			if (endpoint != "/status")
+				console.log(ip + ": " + msg.url);
 			
 			var api = ApiVersions[apiVersion];
 			if (!api) {
