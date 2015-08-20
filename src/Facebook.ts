@@ -44,6 +44,10 @@ module Facebook {
 		data : T
 	}
 	
+	interface DataWrapError<T> extends FacebookError {
+		data : T
+	}
+	
 	interface Page<T> extends FacebookError {
 		data : T[]
 		paging : {
@@ -89,7 +93,8 @@ module Facebook {
 	}
 	
 	export function getTokenInfo(token : string) {
-		var tokenInfo = fetchPlainJson<DataWrap<TokenInfo>>(url+"/debug_token?input_token="+token+"&access_token="+appToken).data;
+		var tokenInfoWrapped = fetchJson<DataWrapError<TokenInfo>>(url+"/debug_token?input_token="+token+"&access_token="+appToken);
+		var tokenInfo = tokenInfoWrapped.data;
 		
 		if (tokenInfo.error)
 			throw new InvalidTokenError(tokenInfo.error.message);
