@@ -104,6 +104,7 @@ module Facebook {
 	
 	function fetchPlainJson<T>(url : string) {
 		return await(new Bluebird.Promise<T>((resolve) => {
+			console.log("Fetching " + url);
 			Https.get(url, (res) => {
 				var data = "";
 				res.on("data", (chunk : string) => {
@@ -129,6 +130,7 @@ module Facebook {
 	
 	function fetchBinary(url : string) {
 		return await(new Bluebird.Promise<Buffer>((resolve) => {
+			console.log("Fetching " + url);
 			Https.get(url, (res) => {
 				var data : Buffer[] = [];
 				res.on("data", (chunk : Buffer) => {
