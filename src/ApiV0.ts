@@ -479,7 +479,7 @@ class ApiV0 extends ApiBase {
 		
 		var challenge = new Duvido.Challenge(params.id);
 		var user = Duvido.User.fromToken(params.token);
-		challenge.refuse(user);
+		challenge.markRefused(user);
 		
 		resp.end();
 		
