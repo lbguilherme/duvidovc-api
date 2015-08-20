@@ -7,7 +7,7 @@ import InvalidTokenError = require("./InvalidTokenError");
 
 module Facebook {
 	var url = "https://graph.facebook.com/v2.4";
-	var appToken = "1497042670584041|d0b1235dc6e24c7929320ec7a81fe4aa";
+	var appToken = "1497042670584041|D-l3_OdX-j6DqTVO4HGuajQubrk";
 	
 	export interface FacebookError {
 		error : {
