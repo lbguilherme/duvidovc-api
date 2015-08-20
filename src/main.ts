@@ -1,4 +1,7 @@
 /// <reference path="../decl/source-map-support.d.ts" />
+/// <reference path="../decl/bluebird.d.ts" />
+/// <reference path="../decl/cassandra-driver.d.ts" />
+
 require("newrelic");
 import SourceMapSupport = require("source-map-support"); SourceMapSupport.install();
 import Server = require("./Server");

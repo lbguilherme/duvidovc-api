@@ -26,8 +26,7 @@ class Image {
 		var hash = Crypto.createHash("sha512");
 		hash.update(data);
 		var sha512 = hash.digest("hex");
-		var existing = DB.images.findOne({id: sha512}, {_id: 1});
-		if (existing)
+		if (DB.ImagesTable.exists(sha512))
 			return new Image(sha512);
 		
 		var imageData : DB.Image = {
@@ -37,7 +36,7 @@ class Image {
 			owner: owner.id,
 			width: 0,
 			height: 0,
-			sizes: []
+			sizes: {}
 		};
 		
 		if (orientation % 90 != 0)
@@ -65,47 +64,41 @@ class Image {
 				out.quality(70).toBuffer("JPEG", (err, buffer) => {
 					if (err) {reject(err); return;}
 					async(() => {
-						var data = Data.create(buffer);
-						data.incrementLinks();
-						imageData.sizes.push({
-							width: w,
-							dataId: data.id
-						});
+						imageData.sizes[w] = Data.create(buffer).id;
 					})().done(resolve, reject);
 				});
 			});
 		}));
 		
-		DB.images.insertOne(imageData);
+		DB.ImagesTable.insert(imageData);
 		return new Image(imageData.id);
 	}
 	
 	exists() {
-		var image = DB.images.findOne({id: this.id}, {_id: 1});
-		return !!image;
+		return DB.ImagesTable.exists(this.id);
 	}
 	
 	getOwner() {
-		var image = DB.images.findOne({id: this.id}, {_id: 0, owner: 1});
-		return image.owner;
+		return new User(DB.ImagesTable.fetch(this.id).owner);
 	}
 	
 	getDataIdForSize(size : number) {
-		var image = DB.images.findOne({id: this.id}, {_id: 0, sizes: 1});
-		var currentBest = image.sizes[0];
-		image.sizes.forEach(entry => {
-			if (entry.width < size && currentBest.width < entry.width)
-				currentBest = entry;
-			if (entry.width > size && currentBest.width < size)
-				currentBest = entry;
-			if (entry.width > size && currentBest.width > size && currentBest.width > entry.width)
-				currentBest = entry;
+		var image = DB.ImagesTable.fetch(this.id);
+		var sizes = Object.keys(image.sizes).map(str => {return parseInt(str);});
+		var currentBest = sizes[0];
+		sizes.forEach(width => {
+			if (width < size && currentBest < width)
+				currentBest = width;
+			if (width > size && currentBest < size)
+				currentBest = width;
+			if (width > size && currentBest > size && currentBest > width)
+				currentBest = width;
 		});
-		return currentBest.dataId;
+		return image.sizes[currentBest];
 	}
 	
 	getRatio() {
-		var image = DB.images.findOne({id: this.id}, {_id: 0, width: 1, height: 1});
+		var image = DB.ImagesTable.fetch(this.id);
 		return image.width / image.height;
 	}
 }

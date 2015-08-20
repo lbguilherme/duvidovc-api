@@ -1,5 +1,3 @@
-/// <reference path="../decl/bluebird.d.ts" />
-
 import Http = require("http");
 import Bluebird = require("bluebird");
 import await = require("asyncawait/await");

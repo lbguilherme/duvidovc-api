@@ -1,4 +1,3 @@
-/// <reference path="../decl/mongodb.d.ts" />
 /// <reference path="../decl/node-uuid.d.ts" />
 
 export = Challenge;
@@ -7,7 +6,6 @@ import DB = require("./DB");
 import Utility = require("./Utility");
 import User = require("./Duvido.User");
 import Image = require("./Duvido.Image");
-import MongoDB = require("mongodb");
 import UUID = require("node-uuid");
 import await = require("asyncawait/await");
 import async = require("asyncawait/async");
@@ -16,7 +14,7 @@ module Challenge {
 	export type CreationInfo = {
 		owner : string,
 		title: string,
-		description : string,
+		details : string,
 		reward : string,
 		targets : string[],
 		duration : number,
@@ -26,7 +24,8 @@ module Challenge {
 
 class Challenge {
 	id : string;
-	data : DB.Challenge;
+	private data : DB.Challenge;
+	private targets : DB.Target[];
 	
 	constructor(id : string) {
 		this.id = id;
@@ -35,18 +34,13 @@ class Challenge {
 	static create(info : Challenge.CreationInfo) {
 		var challenge : DB.Challenge = {
 			id: UUID.v4().replace(/-/g, ""),
-			creationTime: new Date,
+			time: new Date,
 			owner: info.owner,
 			title: info.title,
-			description: info.description,
+			details: info.details,
 			reward: info.reward,
 			imageId: "",
 			videoId: "",
-			targets: info.targets.map(id => {return {
-				id: id,
-				status: "sent",
-				submissions: []
-			};}),
 			duration: info.duration
 		}
 		
@@ -67,59 +61,62 @@ class Challenge {
 			})();
 		}));
 		
-		DB.challenges.insertOne(challenge);
+		DB.ChallengesTable.insert(challenge);
+		
+		await(info.targets.map(id => {
+			return async(() => {
+				var target : DB.Target = {
+					challenge: challenge.id,
+					id: id,
+					status: "sent"
+				};
+				DB.TargetsTable.insert(target);
+			})();
+		}));
+		
 		return challenge.id;
 	}
 	
 	static listFromOwner(owner : User) {
-		var list = DB.challenges.list({owner: owner.id}, {_id: 0});
+		var list = DB.ChallengesTable.query("owner", owner.id);
 		return list.map(data => {
-			var challenge = new Challenge(data.id);
-			challenge.data = data
-			return challenge;
+			var c = new Challenge(data.id);
+			c.data = data;
+			return c;
 		});
 	}
 	
-	static listFromTarget(user : User) {
-		var list = DB.challenges.list({targets: {$elemMatch: {$and: [{id: user.id}, {$or: [{status: "sent"}, {status: "received"}]}]}}}, {_id: 0});
-		return list.map(data => {
-			var challenge = new Challenge(data.id);
-			challenge.data = data
-			return challenge;
-		});
-	}
-	
-	static markAllFromTargetAsReceivedAsync(user : User) {
-		var list = DB.challenges.list({targets: {$elemMatch: {$and: [{id: user.id}, {$or: [{status: "sent"}]}]}}}, {_id: 0});
-		list.forEach(challenge => {
-			challenge.targets.forEach(target => {
-				if (target.id == user.id && target.status == "sent") {
-					target.status = "received";
-				}
-			});
-			DB.challenges.updateOneAsync({id: challenge.id}, {$set: {targets: challenge.targets}});
+	static listFromTarget(user : User) : Challenge[] {
+		var targetList = DB.TargetsTable.query("id", user.id)
+		targetList = targetList.filter(target => {return target.status == "sent" || target.status == "received"});
+		return targetList.map(target => {
+			return new Challenge(target.challenge);
 		});
 	}
 	
 	getData() {
-		if (this.data)
-			return this.data;
-		else
-			return this.data = DB.challenges.findOne({id: this.id}, {_id: 0});
+		if (!this.data)
+			return this.data = DB.ChallengesTable.fetch(this.id);
+		
+		return this.data;
 	}
 	
-	refuse(user : User) {
-		var challenge = DB.challenges.findOne({id: this.id}, {_id: 0, targets: 1});
-		
-		if (!challenge)
-			return;
-		
-		challenge.targets.forEach(target => {
-			if (target.id == user.id && (target.status == "received" || target.status == "sent")) {
-				target.status = "refused";
-			}
-		});
-		
-		DB.challenges.updateOne({id: this.id}, {$set: {targets: challenge.targets}});
+	getTargets() {
+		if (!this.targets)
+			this.targets = DB.TargetsTable.query("challenge", this.id);
+			
+		return this.targets;
+	}
+	
+	getTargetIds() {
+		return this.getTargets().map(target => {return target.id});
+	}
+	
+	markReceived(user : User) {
+		DB.TargetsTable.markAs(this.id, user.id, "received");
+	}
+	
+	markRefused(user : User) {
+		DB.TargetsTable.markAs(this.id, user.id, "refused");
 	}
 }
