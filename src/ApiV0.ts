@@ -344,8 +344,7 @@ class ApiV0 extends ApiBase {
 		// Collect all ids
 		var ids : string[] = [];
 		challenges.forEach(challenge => {
-			challenge.data.targets.forEach(target => {
-				var id = target.id;
+			challenge.getTargetIds().forEach(id => {
 				if (ids.indexOf(id) == -1)
 					ids.push(id);
 			});
@@ -361,28 +360,20 @@ class ApiV0 extends ApiBase {
 		
 		// Add all challenges to the final reply list
 		challenges.forEach(challenge => {
-			var c = challenge.data;
+			var c = challenge.getData();
 			infos.push({
 				id: c.id,
-				creationTime: c.creationTime.getTime()+"",
+				creationTime: c.time.getTime()+"",
 				title: c.title,
 				details: c.details,
 				reward: c.reward,
 				duration: c.duration,
 				imageId: c.imageId,
 				videoId: c.videoId,
-				targets: c.targets.map(target => {return {
+				targets: challenge.getTargets().map(target => {return {
 					id: target.id,
 					name: names[target.id],
-					status: target.status,
-					submissions: target.submissions.map(submission => {return {
-						status: submission.status,
-						text: submission.text,
-						imageId: submission.imageId,
-						videoId: submission.videoId,
-						sentTime: submission.sentTime.getTime()+"",
-						judgedTime: submission.judgedTime.getTime()+""
-					};})
+					status: target.status
 				};})
 			});
 		});
@@ -428,10 +419,10 @@ class ApiV0 extends ApiBase {
 		var ids : string[] = [];
 		var imageIds : string[] = [];
 		challenges.forEach(challenge => {
-			var id = challenge.data.owner;
+			var id = challenge.getData().owner;
 			if (ids.indexOf(id) == -1)
 				ids.push(id);
-			var imageId = challenge.data.imageId;
+			var imageId = challenge.getData().imageId;
 			if (imageId && imageIds.indexOf(imageId) == -1)
 				imageIds.push(imageId);
 		});
@@ -454,10 +445,10 @@ class ApiV0 extends ApiBase {
 		
 		// Add all challenges to the final reply list
 		challenges.forEach(challenge => {
-			var c = challenge.data;
+			var c = challenge.getData();
 			infos.push({
 				id: c.id,
-				creationTime: c.creationTime.getTime()+"",
+				creationTime: c.time.getTime()+"",
 				owner: {id : c.owner, name: names[c.owner]},
 				title: c.title,
 				details: c.details,
