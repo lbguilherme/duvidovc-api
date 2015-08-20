@@ -73,8 +73,9 @@ class Server {
 			else
 				resp.statusCode = 500; // Unknown Error
 			
-			console.log(e.name + (e.message ? ": " + e.message : ""));
 			if (e.stack) console.log(e.stack);
+			else console.log(e.name + (e.message ? ": " + e.message : ""));
+			
 			resp.setHeader("Content-Type", "text/plain");
 			resp.write(e.name + (e.message ? ": " + e.message : ""));
 			resp.end();
