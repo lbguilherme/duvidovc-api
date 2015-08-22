@@ -25,6 +25,8 @@ class Image {
 	static create(owner : User, orientation : number, data : Buffer) {
 		var hash = Crypto.createHash("sha512");
 		hash.update(data);
+		hash.update(orientation+"");
+		hash.update("v3"); // ignore old caches
 		var sha512 = hash.digest("hex");
 		if (DB.ImagesTable.exists(sha512))
 			return new Image(sha512);
@@ -45,6 +47,14 @@ class Image {
 		var img = GM.subClass({nativeAutoOrient: true})(data);
 		
 		await(new Bluebird.Promise((resolve, reject) => {
+			img.autoOrient().rotate("white", orientation).toBuffer((err, buffer) => {
+				if (err) {reject(err); return;}
+				img = GM(buffer);
+				resolve(null);
+			});
+		}));
+		
+		await(new Bluebird.Promise((resolve, reject) => {
 			img.size((err, size) => {
 				if (err) {reject(err); return;}
 				imageData.width = size.width;
@@ -59,7 +69,7 @@ class Image {
 			
 		await(toDoSizes.map(w => {
 			return new Bluebird.Promise<void>((resolve, reject) => {
-				var out = img.autoOrient().rotate("white", orientation);
+				var out = img;
 				if (w != imageData.width) out = out.scale(w, 9999);
 				out.quality(70).toBuffer("JPEG", (err, buffer) => {
 					if (err) {reject(err); return;}
