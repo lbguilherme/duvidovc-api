@@ -132,12 +132,33 @@ class Challenge {
 		return this.getData().time.getTime()/1000 + this.getData().duration < new Date().getTime()/1000;
 	}
 	
+	submitReply(user : User, image : Image) {
+		var submission : DB.Submission = {
+			challenge: this.id,
+			target: user.id,
+			id: UUID.v4(),
+			status: "waiting",
+			text: "",
+			imageId: image.id,
+			videoId: "",
+			sentTime: new Date(),
+			judgedTime: null
+		};
+		
+		DB.SubmissionsTable.insert(submission);
+		this.markSubmitted(user);
+	}
+	
 	markReceived(user : User) {
 		DB.TargetsTable.markAs(this.id, user.id, "received");
 	}
 	
 	markRefused(user : User) {
 		DB.TargetsTable.markAs(this.id, user.id, "refused");
+	}
+	
+	markSubmitted(user : User) {
+		DB.TargetsTable.markAs(this.id, user.id, "submitted");
 	}
 	
 	markExpired(user : User) {

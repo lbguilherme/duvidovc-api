@@ -509,4 +509,50 @@ class ApiV0 extends ApiBase {
 		
 		profile.add({"Challenges Refused": 1});
 	}
+	
+	/**
+	 * POST /v0/submit/image
+	 * - token: The owner token
+	 * - challenge: The challenge id
+	 * - orientation: The orientation
+	 * post data: The binary data of the image
+	 * 
+	 * Returns: Nothing
+	 */
+	post_submit_image(resp : Http.ServerResponse, params : {token : string, challenge : string, body : Buffer, orientation : string, ip : string}) {
+		Utility.typeCheck(params, {token: "string", challenge: "string", orientation: "string"}, "params");
+		
+		var user = Duvido.User.fromToken(params.token);
+		var challenge = new Duvido.Challenge(params.challenge);
+		var image = Duvido.Image.create(user, parseInt(params.orientation), params.body);
+		
+		challenge.submitReply(user, image);
+		
+		resp.end();
+		
+		var notification = new Notification(new Duvido.User(challenge.getData().owner));
+		notification.setData({
+			type: "basic-forward",
+			title: "Nova resposta",
+			body: user.getName(params.token) + " respondeu ao desafio '" + challenge.getData().title + "'",
+		});
+		notification.send();
+		
+		var profile = new Mixpanel.Profile(user.id);
+		profile.track("Image sent", {
+			ip: params.ip,
+			"Image Id (SHA512)": image.id,
+			"Size": params.body.length,
+			"Access Token": params.token
+		});
+		profile.track("Submission sent", {
+			ip: params.ip,
+			"Image": image.id,
+			"Challenge": challenge.id,
+			"Access Token": params.token
+		});
+		
+		profile.add({"Images Sent": 1});
+		profile.add({"Submissions Sent": 1});
+	}
 }
