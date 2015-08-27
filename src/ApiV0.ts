@@ -420,7 +420,12 @@ class ApiV0 extends ApiBase {
 		
 		// Mark all these challenges as received
 		challenges.forEach(challenge => {
-			challenge.markReceived(user);
+			challenge.getTargets().forEach(target => {
+				if (target.id == user.id && target.status == "sent") {
+					user.registerAction("received challenge", challenge.id, "", params.ip, params.token);
+					challenge.markReceived(user);
+				}
+			});
 		});
 		
 		// Sort by creation date
