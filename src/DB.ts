@@ -216,6 +216,11 @@ module DB {
 
 /* Database Schema
 
+CREATE KEYSPACE duvido
+  WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+
+USE duvido;
+
 CREATE TABLE tokens (
 	accessToken text PRIMARY KEY,
 	userId text,
