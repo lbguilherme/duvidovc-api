@@ -415,6 +415,9 @@ class ApiV0 extends ApiBase {
 		var user = Duvido.User.fromToken(params.token);
 		var challenges = Duvido.Challenge.listFromTarget(user);
 		
+		// Filter out expired challenges
+		challenges = challenges.filter(challenge => { return !challenge.hasExpired(); });
+		
 		// Mark all these challenges as received
 		challenges.forEach(challenge => {
 			challenge.markReceived(user);
