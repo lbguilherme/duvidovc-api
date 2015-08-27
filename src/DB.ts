@@ -79,6 +79,16 @@ module DB {
 		gcmTokens : string[]
 	}
 	
+	export interface Action {
+		user : string
+		action : string
+		object : string
+		param : string
+		ip : string
+		time : Date
+		token : string
+	}
+	
 	export interface Image {
 		id : string
 		time : Date
@@ -119,7 +129,7 @@ module DB {
 	}
 	
 	class GenericTableClass<T> {
-		constructor(private table : string, private columns : string[], private key? : string) {}
+		constructor(protected table : string, protected columns : string[], protected key? : string) {}
 		fixFields(object : {}) {
 			this.columns.forEach(column => {
 				var value = (<any>object)[column.toLowerCase()];
@@ -160,6 +170,15 @@ module DB {
 			"gender", "birthday", "email", "gcmTokens"], "id");}
 	}
 	
+	class ActionsTableClass extends GenericTableClass<Action> {
+		constructor() {super("actions", ["user", "action", "object", "param", "ip", "time", "token"], "id");}
+		insert(data : Action) {
+			var rawData = <any>data;
+			DB.execute("INSERT INTO "+this.table+" (id, "+this.columns.join(", ")+") VALUES (uuid(), "+this.columns.map(()=>{return "?";}).join(", ")+");",
+				this.columns.map(column => {return rawData[column];}));
+		}
+	}
+	
 	class DataTableClass extends GenericTableClass<Data> {
 		constructor() {super("data", ["id", "data"], "id");}
 	}
@@ -186,6 +205,7 @@ module DB {
 	
 	export var TokensTable = new TokensTableClass();
 	export var UsersTable = new UsersTableClass();
+	export var ActionsTable = new ActionsTableClass();
 	export var DataTable = new DataTableClass();
 	export var ImagesTable = new ImagesTableClass();
 	export var ChallengesTable = new ChallengesTableClass();
@@ -214,6 +234,17 @@ CREATE TABLE users (
 	birthday timestamp,
 	email text,
 	gcmTokens set<text>
+);
+
+CREATE TABLE actions (
+	id uuid PRIMARY KEY,
+	user text,
+	action text,
+	object text,
+	param text,
+	ip text,
+	time timestamp,
+	accessToken text
 );
 
 CREATE TABLE data (

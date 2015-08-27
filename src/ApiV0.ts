@@ -37,6 +37,8 @@ class ApiV0 extends ApiBase {
 		var user = Duvido.User.fromToken(params.token);
 		var name = user.getName(params.token);
 		
+		user.registerAction("login", "", "", params.ip, params.token);
+		
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify({id: user.id,	name: name}));
 		resp.end();
@@ -215,6 +217,8 @@ class ApiV0 extends ApiBase {
 			"Access Token": params.token
 		});
 		
+		user.registerAction("uploaded image", image.id, "", params.ip, params.token);
+		
 		profile.add({"Images Sent": 1});
 	}
 	
@@ -275,6 +279,8 @@ class ApiV0 extends ApiBase {
 		var challengeId = Duvido.Challenge.create(info);
 		
 		resp.end();
+		
+		user.registerAction("sent challenge", challengeId, "", params.ip, params.token);
 		
 		var profile = new Mixpanel.Profile(user.id);
 		
@@ -390,7 +396,7 @@ class ApiV0 extends ApiBase {
 	 * 
 	 * Returns: The "info" variable
 	 */
-	get_feed(resp : Http.ServerResponse, params : {token : string}) {
+	get_feed(resp : Http.ServerResponse, params : {token : string, ip : string}) {
 		Utility.typeCheck(params, {token: "string"}, "params");
 		
 		var infos : {
@@ -479,6 +485,8 @@ class ApiV0 extends ApiBase {
 		
 		var challenge = new Duvido.Challenge(params.id);
 		var user = Duvido.User.fromToken(params.token);
+		
+		user.registerAction("refused challenge", challenge.id, "", params.ip, params.token);
 		challenge.markRefused(user);
 		
 		resp.end();

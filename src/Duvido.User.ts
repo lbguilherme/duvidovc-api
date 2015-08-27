@@ -193,4 +193,16 @@ class User {
 		var user = DB.UsersTable.fetch(this.id);
 		return user.gcmTokens || [];
 	}
+	
+	registerAction(action : string, object : string, param : string, ip : string, token : string) {
+		DB.ActionsTable.insert({
+			user: this.id,
+			action: action,
+			object: object,
+			token: token,
+			param: param,
+			time: new Date(),
+			ip: ip
+		});
+	}
 }
