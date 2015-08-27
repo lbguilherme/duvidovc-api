@@ -29,6 +29,7 @@ class Challenge {
 	
 	constructor(id : string) {
 		this.id = id;
+		this.refresh();
 	}
 	
 	static create(info : Challenge.CreationInfo) {
@@ -94,6 +95,17 @@ class Challenge {
 		});
 	}
 	
+	refresh() {
+		if (this.hasExpired()) {
+			this.getTargets().forEach(target => {
+				if (target.status == "sent" || target.status == "received") {
+					target.status = "expired";
+					this.markExpired(new User(target.id));
+				}
+			});
+		}
+	}
+	
 	getData() {
 		if (!this.data)
 			return this.data = DB.ChallengesTable.fetch(this.id);
@@ -112,11 +124,19 @@ class Challenge {
 		return this.getTargets().map(target => {return target.id});
 	}
 	
+	hasExpired() {
+		return this.getData().time.getTime()/1000 + this.getData().duration < new Date().getTime()/1000;
+	}
+	
 	markReceived(user : User) {
 		DB.TargetsTable.markAs(this.id, user.id, "received");
 	}
 	
 	markRefused(user : User) {
 		DB.TargetsTable.markAs(this.id, user.id, "refused");
+	}
+	
+	markExpired(user : User) {
+		DB.TargetsTable.markAs(this.id, user.id, "expired");
 	}
 }
