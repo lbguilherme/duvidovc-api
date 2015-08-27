@@ -113,7 +113,7 @@ module DB {
 	export interface Target {
 		challenge : string
 		id : string
-		status : string // "sent" | "received" | "submitted" | "rewarded" | "refused"
+		status : string // "sent" | "received" | "submitted" | "accepted" | "refused" | "expired"
 	}
 	
 	export interface Submission {
