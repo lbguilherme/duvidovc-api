@@ -9,6 +9,7 @@ import Image = require("./Duvido.Image");
 import UUID = require("node-uuid");
 import await = require("asyncawait/await");
 import async = require("asyncawait/async");
+import InputError = require("./InputError");
 
 module Challenge {
 	export type CreationInfo = {
@@ -108,7 +109,10 @@ class Challenge {
 	
 	getData() {
 		if (!this.data)
-			return this.data = DB.ChallengesTable.fetch(this.id);
+			this.data = DB.ChallengesTable.fetch(this.id);
+		
+		if (!this.data)
+			throw new InputError("Invalid id");
 		
 		return this.data;
 	}
