@@ -17,44 +17,44 @@ class User {
 	}
 
 	static fromToken(token : string) {
-		var requiredScopes = ["email", "user_birthday", "user_friends", "public_profile"];
+		var requiredScopes = ["user_friends", "public_profile"];
 		var tokenInfo = DB.TokensTable.fetch(token);
-		
+
 		if (tokenInfo) {
 			var scopes = tokenInfo.scopes || [];
-			
+
 			var acceptableScopes = true;
 			requiredScopes.forEach(scope => {
 				if (scopes.indexOf(scope) == -1)
 					acceptableScopes = false;
 			});
-			
+
 			if (tokenInfo.expiresAt >= new Date() && acceptableScopes) {
 				return new User(tokenInfo.userId);
 			}
 		}
-		
+
 		var fbTokenInfo = Facebook.getTokenInfo(token);
-		
+
 		if (fbTokenInfo.app_id != "1497042670584041" || fbTokenInfo.is_valid == false) {
 			throw new InvalidTokenError();
 		}
-		
+
 		requiredScopes.forEach(scope => {
 			if (fbTokenInfo.scopes.indexOf(scope) == -1)
 				throw new InvalidTokenError();
 		});
-		
+
 		DB.TokensTable.insert({
 			accessToken: token,
 			userId: fbTokenInfo.user_id,
 			expiresAt: new Date(fbTokenInfo.expires_at*1000),
 			scopes: fbTokenInfo.scopes
 		});
-		
+
 		return new User(fbTokenInfo.user_id);
 	}
-	
+
 	exists() {
 		return DB.UsersTable.exists(this.id);
 	}
@@ -66,19 +66,19 @@ class User {
 			if (data.exists())
 				return data.getBuffer();
 		}
-		
+
 		var avatar = Facebook.getAvatar(this.id);
 		if (user) {
 			DB.UsersTable.set(this.id, "avatarDataId", Data.create(avatar).id);
 		}
-		
+
 		return avatar;
 	}
-	
+
 	setFriendsAsync(friends : string[]) {
 		DB.UsersTable.set(this.id, "friends", friends);
 	}
-	
+
 	addFriend(friend : string) {
 		var user = DB.UsersTable.fetch(this.id);
 		if (user && user.friends) {
@@ -88,7 +88,7 @@ class User {
 
 	getFriends(token : string) {
 		var user = DB.UsersTable.fetch(this.id);
-		
+
 		if (user && user.friends) {
 			return user.friends.map(id => {return new User(id);});
 		} else {
@@ -109,7 +109,7 @@ class User {
 	setNameAsync(name : string) {
 		DB.UsersTable.set(this.id, "name", name);
 	}
-	
+
 	setFromFacebookUser(userInfo : Facebook.User) {
 		DB.UsersTable.set(this.id, "name", userInfo.name);
 		DB.UsersTable.set(this.id, "firstName", userInfo.first_name);
@@ -118,7 +118,7 @@ class User {
 		DB.UsersTable.set(this.id, "birthday", new Date(userInfo.birthday));
 		DB.UsersTable.set(this.id, "email", userInfo.email);
 	}
-	
+
 	getName(token : string) {
 		var user = DB.UsersTable.fetch(this.id);
 		if (user && user.name) {
@@ -140,7 +140,7 @@ class User {
 			return [userInfo.first_name, userInfo.last_name];
 		}
 	}
-	
+
 	getBirthday(token : string) {
 		var user = DB.UsersTable.fetch(this.id);
 		if (user && user.birthday) {
@@ -151,7 +151,7 @@ class User {
 			return new Date(userInfo.birthday);
 		}
 	}
-	
+
 	getAge(token : string) {
 	    var today = new Date();
 	    var birthday = this.getBirthday(token);
@@ -162,7 +162,7 @@ class User {
 	    }
 	    return age;
 	}
-	
+
 	getGender(token : string) {
 		var user = DB.UsersTable.fetch(this.id);
 		if (user && user.gender) {
@@ -173,7 +173,7 @@ class User {
 			return userInfo.gender;
 		}
 	}
-	
+
 	getEmail(token : string) {
 		var user = DB.UsersTable.fetch(this.id);
 		if (user && user.email) {
@@ -184,16 +184,16 @@ class User {
 			return userInfo.email;
 		}
 	}
-	
+
 	addGcmToken(gcmToken : string) {
 		DB.UsersTable.addToSet(this.id, "gcmTokens", gcmToken);
 	}
-	
+
 	getGcmTokens() : string[] {
 		var user = DB.UsersTable.fetch(this.id);
 		return user.gcmTokens || [];
 	}
-	
+
 	registerAction(action : string, object : string, param : string, ip : string, token : string) {
 		DB.ActionsTable.insert({
 			user: this.id,
