@@ -586,4 +586,112 @@ class ApiV0 extends ApiBase {
 
 		profile.add({"Submissions Sent": 1});
 	}
+
+	/**
+	 * GET /v0/challenges
+	 * - token: user token
+	 *
+	 * Returns: The "info" variable
+	 */
+	get_playing(resp : Http.ServerResponse, params : {token : string}) {
+		Utility.typeCheck(params, {token: "string"}, "params");
+
+		var infos : {
+			id : string
+			challengeOwner : {id : string, name : string}
+			challenge : string
+			creationTime : string
+			sentTime : string
+			judgeTime : string
+			title : string
+			details : string
+			reward : string
+			duration : number
+			imageId : string
+			videoId : string
+			ratio : number
+			text : string
+			status : string
+		}[] = [];
+
+		var user = Duvido.User.fromToken(params.token);
+		var submissions = Duvido.Challenge.listSubmissionsFromTarget(user);
+
+		// Sort by creation date
+		submissions = submissions.sort((a, b) => {
+			return b.sentTime.getTime() - a.sentTime.getTime();
+		});
+
+		// Collect all chalenge ids
+		var challengeIds : string[] = [];
+		var imageIds : string[] = [];
+		submissions.forEach(submission => {
+			var id = submission.challenge;
+			if (challengeIds.indexOf(id) == -1)
+				challengeIds.push(id);
+			var imageId = submission.imageId;
+			if (imageIds.indexOf(imageId) == -1)
+				imageIds.push(imageId);
+		});
+
+		// Fetch the name of each id
+		var challenges : {[id : string] : Duvido.Challenge} = {};
+		await(challengeIds.map(id => {
+			return async(() => {
+				challenges[id] = new Duvido.Challenge(id);
+				challenges[id].getData();
+			})();
+		}));
+
+		// Collect all ids
+		var ownerIds : string[] = [];
+		challengeIds.forEach(challengeId => {
+			var c = challenges[challengeId].getData()
+			var id = c.owner;
+			if (ownerIds.indexOf(id) == -1)
+				ownerIds.push(id);
+		});
+
+		// Fetch the name of each user
+		var names : {[id : string] : string} = {};
+		await(ownerIds.map(id => {
+			return async(() => {
+				names[id] = new Duvido.User(id).getName(params.token);
+			})();
+		}));
+
+		// Fetch the ratio of each image
+		var ratios : {[imageId : string] : number} = {};
+		await(imageIds.map(imageId => {
+			return async(() => {
+				ratios[imageId] = new Duvido.Image(imageId).getRatio();
+			})();
+		}));
+
+		// Add all challenges to the final reply list
+		submissions.forEach(s => {
+			var c = challenges[s.challenge].getData();
+			infos.push({
+				id: s.id,
+				challengeOwner: {id : c.owner, name: names[c.owner]},
+				challenge: c.id,
+				creationTime: c.time.getTime()+"",
+				sentTime: s.sentTime.getTime()+"",
+				judgeTime: s.judgedTime ? s.judgedTime.getTime()+"" : "",
+				title: c.title,
+				details: c.details,
+				reward: c.reward,
+				duration: c.duration,
+				imageId: s.imageId,
+				videoId: s.videoId,
+				ratio: ratios[s.imageId],
+				text: s.text,
+				status: s.status
+			});
+		});
+
+		resp.setHeader("Content-Type", "application/json; charset=utf-8");
+		resp.write(JSON.stringify(infos));
+		resp.end();
+	}
 }
