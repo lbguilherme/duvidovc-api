@@ -7,15 +7,15 @@ import InvalidTokenError = require("./InvalidTokenError");
 
 module Facebook {
 	var url = "https://graph.facebook.com/v2.4";
-	var appToken = "1497042670584041|D-l3_OdX-j6DqTVO4HGuajQubrk";
-	
+	var appToken = "1497042670584041%7CD-l3_OdX-j6DqTVO4HGuajQubrk";
+
 	export interface FacebookError {
 		error : {
 			type : string
 			message : string
 		}
 	};
-	
+
 	export interface User extends FacebookError {
 		id : string
 		name : string
@@ -25,7 +25,7 @@ module Facebook {
 		birthday : string
 		email : string
 	};
-	
+
 	export interface TokenInfo extends FacebookError {
 		app_id : string
 		expires_at : number
@@ -33,26 +33,26 @@ module Facebook {
 		scopes : string[]
 		user_id : string
 	};
-	
+
 	export interface AvatarInfo extends FacebookError {
 		data : {
 			url : string
 		}
 	};
-	
+
 	interface DataWrap<T> {
 		data : T
 	}
-	
+
 	interface DataWrapError<T> extends FacebookError {
 		data : T
 	}
-	
+
 	interface Page<T> extends FacebookError {
 		data : T[]
 		paging : {
 			next : string
-		} 
+		}
 	}
 
 	export function getAvatar(id : string) {
@@ -64,7 +64,7 @@ module Facebook {
 			else
 				throw e;
 		}
-		
+
 		return fetchBinary(info.data.url);
 	}
 
@@ -75,33 +75,33 @@ module Facebook {
 	export function getUser(token : string, id : string) {
 		return fetchJson<User>(url+"/"+id+"/?fields=id,name,first_name,last_name,birthday,gender,email&access_token="+token);
 	}
-	
+
 	export function getFriends(token : string) {
 		var result : {id : string, name : string}[] = [];
 		var page = fetchJson<Page<User>>(url+"/me/friends/?access_token="+token);
-		
+
 		while (true) {
 			for (var i = 0; i < page.data.length; ++i) {
 				result.push({id: page.data[i].id, name: page.data[i].name});
 			}
-			
+
 			if (page.paging && page.paging.next)
 				page = fetchJson<Page<User>>(page.paging.next);
 			else
 				return result;
 		}
 	}
-	
+
 	export function getTokenInfo(token : string) {
 		var tokenInfoWrapped = fetchJson<DataWrapError<TokenInfo>>(url+"/debug_token?input_token="+token+"&access_token="+appToken);
 		var tokenInfo = tokenInfoWrapped.data;
-		
+
 		if (tokenInfo.error)
 			throw new InvalidTokenError(tokenInfo.error.message);
 		else
 			return tokenInfo;
 	}
-	
+
 	function fetchPlainJson<T>(url : string) {
 		return await(new Bluebird.Promise<T>((resolve) => {
 			console.log("Fetching " + url);
@@ -116,7 +116,7 @@ module Facebook {
 			});
 		}));
 	}
-	
+
 	function fetchJson<T extends FacebookError>(url : string) {
 		var data = fetchPlainJson<T>(url);
 		if (data.error) {
@@ -127,7 +127,7 @@ module Facebook {
 		}
 		return data;
 	}
-	
+
 	function fetchBinary(url : string) {
 		return await(new Bluebird.Promise<Buffer>((resolve) => {
 			console.log("Fetching " + url);
