@@ -27,12 +27,12 @@ class Challenge {
 	id : string;
 	private data : DB.Challenge;
 	private targets : DB.Target[];
-	
+
 	constructor(id : string) {
 		this.id = id;
 		this.refresh();
 	}
-	
+
 	static create(info : Challenge.CreationInfo) {
 		var challenge : DB.Challenge = {
 			id: UUID.v4().replace(/-/g, ""),
@@ -45,26 +45,26 @@ class Challenge {
 			videoId: "",
 			duration: info.duration
 		}
-		
+
 		if (info.targets.length == 0) {
 			throw new Error("");
 		}
-		
+
 		if (info.image) {
 			if (!info.image.exists())
 				throw new Error("Challenge image does not exist");
 			challenge.imageId = info.image.id;
 		}
-		
+
 		await(info.targets.map(id => {
 			return async(() => {
 				if (!new User(id).exists())
 					throw new Error("One of the target ids does not exist");
 			})();
 		}));
-		
+
 		DB.ChallengesTable.insert(challenge);
-		
+
 		await(info.targets.map(id => {
 			return async(() => {
 				var target : DB.Target = {
@@ -75,10 +75,10 @@ class Challenge {
 				DB.TargetsTable.insert(target);
 			})();
 		}));
-		
+
 		return challenge.id;
 	}
-	
+
 	static listFromOwner(owner : User) {
 		var list = DB.ChallengesTable.query("owner", owner.id);
 		return list.map(data => {
@@ -87,7 +87,7 @@ class Challenge {
 			return c;
 		});
 	}
-	
+
 	static listFromTarget(user : User) : Challenge[] {
 		var targetList = DB.TargetsTable.query("id", user.id)
 		targetList = targetList.filter(target => {return target.status == "sent" || target.status == "received"});
@@ -95,7 +95,7 @@ class Challenge {
 			return new Challenge(target.challenge);
 		});
 	}
-	
+
 	refresh() {
 		if (this.hasExpired()) {
 			this.getTargets().forEach(target => {
@@ -106,32 +106,33 @@ class Challenge {
 			});
 		}
 	}
-	
+
 	getData() {
 		if (!this.data)
 			this.data = DB.ChallengesTable.fetch(this.id);
-		
+
 		if (!this.data)
 			throw new InputError("Invalid id");
-		
+
 		return this.data;
 	}
-	
+
 	getTargets() {
 		if (!this.targets)
 			this.targets = DB.TargetsTable.query("challenge", this.id);
 			
+
 		return this.targets;
 	}
-	
+
 	getTargetIds() {
 		return this.getTargets().map(target => {return target.id});
 	}
-	
+
 	hasExpired() {
 		return this.getData().time.getTime()/1000 + this.getData().duration < new Date().getTime()/1000;
 	}
-	
+
 	submitReply(user : User, image : Image) {
 		var submission : DB.Submission = {
 			challenge: this.id,
@@ -144,23 +145,23 @@ class Challenge {
 			sentTime: new Date(),
 			judgedTime: null
 		};
-		
+
 		DB.SubmissionsTable.insert(submission);
 		this.markSubmitted(user);
 	}
-	
+
 	markReceived(user : User) {
 		DB.TargetsTable.markAs(this.id, user.id, "received");
 	}
-	
+
 	markRefused(user : User) {
 		DB.TargetsTable.markAs(this.id, user.id, "refused");
 	}
-	
+
 	markSubmitted(user : User) {
 		DB.TargetsTable.markAs(this.id, user.id, "submitted");
 	}
-	
+
 	markExpired(user : User) {
 		DB.TargetsTable.markAs(this.id, user.id, "expired");
 	}

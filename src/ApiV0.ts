@@ -10,7 +10,7 @@ import Mixpanel = require("./Mixpanel");
 import Notification = require("./Notification");
 
 class ApiV0 extends ApiBase {
-	
+
 	/**
 	 * GET /v0/status
 	 */
@@ -22,7 +22,7 @@ class ApiV0 extends ApiBase {
 	/**
 	 * POST /v0/login
 	 * - token: Facebook access token from the user
-	 * 
+	 *
 	 * Returns: JSON
 	 * {
 	 * 	id : string, the current user's id
@@ -33,26 +33,26 @@ class ApiV0 extends ApiBase {
 		                                             device? : string, brand? : string, model? : string, method : string, version : string,
 													 dpi : string, width : string, height : string, deviceid : string, playservices : string}) {
 		Utility.typeCheck(params, {token: "string", method: "string", version: "string", dpi: "string", width: "string", height: "string"}, "params");
-		
+
 		var user = Duvido.User.fromToken(params.token);
 		var name = user.getName(params.token);
-		
+
 		user.registerAction("login", "", "", params.ip, params.token);
-		
+
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify({id: user.id,	name: name}));
 		resp.end();
-		
+
 		var firstLastNames = user.getFirstLastName(params.token);
 		var birthday = user.getBirthday(params.token);
 		var gender = user.getGender(params.token);
 		var email = user.getEmail(params.token);
-		
+
 		if (params.phone && params.phone[0] !== "+")
 			params.phone = "+" + params.phone;
-			
+
 		var profile = new Mixpanel.Profile(user.id);
-		
+
 		profile.track("Logged in", {
 			ip: params.ip,
 			"Name": name,
@@ -75,7 +75,7 @@ class ApiV0 extends ApiBase {
 			"Screen Width": parseInt(params.width),
 			"Screen Height": parseInt(params.height)
 		});
-		
+
 		profile.set({
 			$ip: params.ip,
 			$username: user.id,
@@ -101,33 +101,33 @@ class ApiV0 extends ApiBase {
 			"Screen Width": parseInt(params.width),
 			"Screen Height": parseInt(params.height)
 		});
-		
+
 		profile.setOnce({$created: new Date()});
 		profile.add({"Login Count": 1});
 	}
-	
+
 	post_gcm(resp : Http.ServerResponse, params : {gcmToken : string, token : string}) {
 		Utility.typeCheck(params, {gcmToken: "string", token: "string"}, "params");
-		
+
 		var user = Duvido.User.fromToken(params.token);
 		user.addGcmToken(params.gcmToken);
-		
+
 		var profile = new Mixpanel.Profile(user.id);
 		profile.union({$android_devices : [params.gcmToken]});
-		
+
 		resp.end();
 	}
 
 	/**
 	 * GET /v0/avatar
 	 * - id: The id of any user
-	 * 
+	 *
 	 * Returns: BINARY
 	 * JPG encoded avatar image.
 	 */
 	get_avatar(resp : Http.ServerResponse, params : {id : string}) {
 		Utility.typeCheck(params, {id: "string"}, "params");
-		
+
 		var user = new Duvido.User(params.id);
 		resp.setHeader("Content-Type", "image/jpeg");
 		resp.write(user.getAvatar());
@@ -137,7 +137,7 @@ class ApiV0 extends ApiBase {
 	/**
 	 * GET /v0/avatars
 	 * - id: A list of comma-separated ids of any users
-	 * 
+	 *
 	 * Returns: BINARY
 	 * A sequence of the following for each input id:
 	 *   - a 4-byte unsigned integer (big endian) to specify image size in bytes
@@ -145,17 +145,17 @@ class ApiV0 extends ApiBase {
 	 */
 	get_avatars(resp : Http.ServerResponse, params : {id : string}) {
 		Utility.typeCheck(params, {id: "string"}, "params");
-		
+
 		var ids = params.id.split(",");
 		if (ids.length > 100)
 			throw new Error("too many avatars");
-		
+
 		var avatars = await(ids.map(id => {
 			return async(() => {
 				return new Duvido.User(id).getAvatar();
 			})();
 		}));
-		
+
 		resp.setHeader("Content-Type", "application/octet-stream");
 		avatars.forEach(avatar => {
 			var size = new Buffer(4);
@@ -169,7 +169,7 @@ class ApiV0 extends ApiBase {
 	/**
 	 * GET /v0/friends
 	 * - token: user token
-	 * 
+	 *
 	 * Returns: JSON
 	 * An array of the following:
 	 * {
@@ -179,36 +179,36 @@ class ApiV0 extends ApiBase {
 	 */
 	get_friends(resp : Http.ServerResponse, params : {token : string}) {
 		Utility.typeCheck(params, {token: "string"}, "params");
-		
+
 		var user = Duvido.User.fromToken(params.token);
 		var friends = await(user.getFriends(params.token).map(user => {
 			return async(() => {
 				return {id: user.id, name: user.getName(params.token)};
 			})();
 		}));
-		
+
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify(friends));
 		resp.end();
 	}
-	
+
 	/**
 	 * POST /v0/image
 	 * - token: The owner token
 	 * post data: The binary data of the image
-	 * 
+	 *
 	 * Returns: Plaintext: the image id
 	 */
 	post_image(resp : Http.ServerResponse, params : {token : string, body : Buffer, orientation : string, ip : string}) {
 		Utility.typeCheck(params, {token: "string", orientation: "string"}, "params");
-		
+
 		var user = Duvido.User.fromToken(params.token);
 		var image = Duvido.Image.create(user, parseInt(params.orientation), params.body);
-		
+
 		resp.setHeader("Content-Type", "text/plain");
 		resp.write(image.id);
 		resp.end();
-		
+
 		var profile = new Mixpanel.Profile(user.id);
 		profile.track("Image uploaded", {
 			ip: params.ip,
@@ -216,32 +216,32 @@ class ApiV0 extends ApiBase {
 			"Size": params.body.length,
 			"Access Token": params.token
 		});
-		
+
 		user.registerAction("uploaded image", image.id, "", params.ip, params.token);
-		
+
 		profile.add({"Images Sent": 1});
 	}
-	
+
 	/**
 	 * GET /v0/image
 	 * - id: An image id
 	 * - size: A hint for the minimum size
-	 * 
+	 *
 	 * Returns: BINARY
 	 * JPG encoded image.
 	 */
 	get_image(resp : Http.ServerResponse, params : {id : string, size : string}) {
 		Utility.typeCheck(params, {id: "string", size: "string"}, "params");
-		
+
 		var image = new Duvido.Image(params.id);
 		if (!image.exists()) {
 			resp.statusCode = 404;
 			resp.end();
 			return;
 		}
-		
+
 		var data = new Duvido.Data(image.getDataIdForSize(parseInt(params.size)));
-		
+
 		resp.setHeader("Content-Type", "image/jpeg");
 		resp.write(data.getBuffer());
 		resp.end();
@@ -256,7 +256,7 @@ class ApiV0 extends ApiBase {
 	 * - targets: A comma separated list of friend's ids
 	 * - duration: The duration in minutes
 	 * - image: The upload id of the image, optional
-	 * 
+	 *
 	 * Returns: Nothing
 	 */
 	post_challenge(resp : Http.ServerResponse, params : {token : string, title : string, details : string, reward : string,
@@ -264,7 +264,7 @@ class ApiV0 extends ApiBase {
 		Utility.typeCheck(params, {
 			token: "string", title: "string", details: "string", reward: "string",
 			targets: "string", duration: "string"}, "params");
-		
+
 		var user = Duvido.User.fromToken(params.token);
 		var info : Duvido.Challenge.CreationInfo = {
 			owner: user.id,
@@ -275,15 +275,15 @@ class ApiV0 extends ApiBase {
 			duration: parseInt(params.duration),
 			image: params.imageId ? new Duvido.Image(params.imageId) : null
 		}
-		
+
 		var challengeId = Duvido.Challenge.create(info);
-		
+
 		resp.end();
-		
+
 		user.registerAction("sent challenge", challengeId, "", params.ip, params.token);
-		
+
 		var profile = new Mixpanel.Profile(user.id);
-		
+
 		profile.track("Challenge created", {
 			ip: params.ip,
 			"Access Token": params.token,
@@ -295,15 +295,15 @@ class ApiV0 extends ApiBase {
 			"Duration (s)": parseInt(params.duration),
 			"Image Id": params.imageId || null
 		});
-		
+
 		profile.add({"Challenges Created": 1});
-		
+
 		var name = user.getName(params.token);
-		
+
 		params.targets.split(",").forEach(target => {
 			var targetProfile = new Mixpanel.Profile(target, false);
 			targetProfile.add({"Challenges Received": 1});
-			
+
 			var notification = new Notification(new Duvido.User(target));
 			notification.setData({
 				type: "basic-forward",
@@ -313,16 +313,16 @@ class ApiV0 extends ApiBase {
 			notification.send();
 		});
 	}
-	
+
 	/**
 	 * GET /v0/challenges
 	 * - token: user token
-	 * 
+	 *
 	 * Returns: The "info" variable
 	 */
 	get_challenges(resp : Http.ServerResponse, params : {token : string}) {
 		Utility.typeCheck(params, {token: "string"}, "params");
-		
+
 		var infos : {
 			id : string
 			creationTime : string
@@ -338,15 +338,15 @@ class ApiV0 extends ApiBase {
 				status : string // "sent" | "received" | "read" | "submitted" | "rewarded"
 			}[]
 		}[] = [];
-		
+
 		var user = Duvido.User.fromToken(params.token);
 		var challenges = Duvido.Challenge.listFromOwner(user);
-		
+
 		// Sort by creation date
 		challenges = challenges.sort((a, b) => {
 			return b.getData().time.getTime() - a.getData().time.getTime();
 		});
-		
+
 		// Collect all ids
 		var ids : string[] = [];
 		challenges.forEach(challenge => {
@@ -355,7 +355,7 @@ class ApiV0 extends ApiBase {
 					ids.push(id);
 			});
 		});
-		
+
 		// Fetch the name of each id
 		var names : {[id : string] : string} = {};
 		await(ids.map(id => {
@@ -363,7 +363,7 @@ class ApiV0 extends ApiBase {
 				names[id] = new Duvido.User(id).getName(params.token);
 			})();
 		}));
-		
+
 		// Add all challenges to the final reply list
 		challenges.forEach(challenge => {
 			var c = challenge.getData();
@@ -383,22 +383,22 @@ class ApiV0 extends ApiBase {
 				};})
 			});
 		});
-		
+
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify(infos));
 		resp.end();
 	}
-	
-	
+
+
 	/**
 	 * GET /v0/feed
 	 * - token: user token
-	 * 
+	 *
 	 * Returns: The "info" variable
 	 */
 	get_feed(resp : Http.ServerResponse, params : {token : string, ip : string}) {
 		Utility.typeCheck(params, {token: "string"}, "params");
-		
+
 		var infos : {
 			id : string
 			creationTime : string
@@ -411,13 +411,13 @@ class ApiV0 extends ApiBase {
 			videoId : string
 			ratio : number
 		}[] = [];
-		
+
 		var user = Duvido.User.fromToken(params.token);
 		var challenges = Duvido.Challenge.listFromTarget(user);
-		
+
 		// Filter out expired challenges
 		challenges = challenges.filter(challenge => { return !challenge.hasExpired(); });
-		
+
 		// Mark all these challenges as received
 		challenges.forEach(challenge => {
 			challenge.getTargets().forEach(target => {
@@ -427,12 +427,12 @@ class ApiV0 extends ApiBase {
 				}
 			});
 		});
-		
+
 		// Sort by creation date
 		challenges = challenges.sort((a, b) => {
 			return b.getData().time.getTime() - a.getData().time.getTime();
 		});
-		
+
 		// Collect all ids
 		var ids : string[] = [];
 		var imageIds : string[] = [];
@@ -444,7 +444,7 @@ class ApiV0 extends ApiBase {
 			if (imageId && imageIds.indexOf(imageId) == -1)
 				imageIds.push(imageId);
 		});
-		
+
 		// Fetch the name of each user
 		var names : {[id : string] : string} = {};
 		await(ids.map(id => {
@@ -452,7 +452,7 @@ class ApiV0 extends ApiBase {
 				names[id] = new Duvido.User(id).getName(params.token);
 			})();
 		}));
-		
+
 		// Fetch the ratio of each image
 		var ratios : {[imageId : string] : number} = {};
 		await(imageIds.map(imageId => {
@@ -460,7 +460,7 @@ class ApiV0 extends ApiBase {
 				ratios[imageId] = new Duvido.Image(imageId).getRatio();
 			})();
 		}));
-		
+
 		// Add all challenges to the final reply list
 		challenges.forEach(challenge => {
 			var c = challenge.getData();
@@ -477,12 +477,12 @@ class ApiV0 extends ApiBase {
 				ratio: ratios[c.imageId]
 			});
 		});
-		
+
 		resp.setHeader("Content-Type", "application/json; charset=utf-8");
 		resp.write(JSON.stringify(infos));
 		resp.end();
 	}
-	
+
 	/**
 	 * POST /v0/refuse
 	 * - token: The owner token
@@ -490,15 +490,15 @@ class ApiV0 extends ApiBase {
 	 */
 	post_refuse(resp : Http.ServerResponse, params : {token : string, id : string, ip : string}) {
 		Utility.typeCheck(params, {token: "string", id: "string"}, "params");
-		
+
 		var challenge = new Duvido.Challenge(params.id);
 		var user = Duvido.User.fromToken(params.token);
-		
+
 		user.registerAction("refused challenge", challenge.id, "", params.ip, params.token);
 		challenge.markRefused(user);
-		
+
 		resp.end();
-		
+
 		var profile = new Mixpanel.Profile(user.id);
 		profile.track("Challenge refused", {
 			ip: params.ip,
@@ -506,30 +506,30 @@ class ApiV0 extends ApiBase {
 			"Access Token": params.token,
 			"Challenge Owner": challenge.getData().owner
 		});
-		
+
 		profile.add({"Challenges Refused": 1});
 	}
-	
+
 	/**
 	 * POST /v0/submit/image
 	 * - token: The owner token
 	 * - challenge: The challenge id
 	 * - orientation: The orientation
 	 * post data: The binary data of the image
-	 * 
+	 *
 	 * Returns: Nothing
 	 */
 	post_submit_image(resp : Http.ServerResponse, params : {token : string, challenge : string, body : Buffer, orientation : string, ip : string}) {
 		Utility.typeCheck(params, {token: "string", challenge: "string", orientation: "string"}, "params");
-		
+	post_submission(resp : Http.ServerResponse, params : {token : string, challenge : string, imageId : string, ip : string}) {
 		var user = Duvido.User.fromToken(params.token);
 		var challenge = new Duvido.Challenge(params.challenge);
 		var image = Duvido.Image.create(user, parseInt(params.orientation), params.body);
 		
 		challenge.submitReply(user, image);
-		
+
 		resp.end();
-		
+
 		var notification = new Notification(new Duvido.User(challenge.getData().owner));
 		notification.setData({
 			type: "basic-forward",
@@ -537,7 +537,7 @@ class ApiV0 extends ApiBase {
 			body: user.getName(params.token) + " respondeu ao desafio '" + challenge.getData().title + "'",
 		});
 		notification.send();
-		
+
 		var profile = new Mixpanel.Profile(user.id);
 		profile.track("Image sent", {
 			ip: params.ip,
