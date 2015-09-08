@@ -96,6 +96,14 @@ class Challenge {
 		});
 	}
 
+	static getSubmission(id : string) {
+		return DB.SubmissionsTable.query({id: id})[0];
+	}
+
+	static listSubmissionsFromTarget(user : User) {
+		return DB.SubmissionsTable.query({target: user.id});
+	}
+
 	listSubmissions() {
 		return DB.SubmissionsTable.query({challenge: this.id});
 	}
