@@ -203,7 +203,7 @@ class User {
 			user: this.id,
 			action: action,
 			object: object,
-			token: token,
+			accessToken: token,
 			param: param,
 			time: new Date(),
 			ip: ip

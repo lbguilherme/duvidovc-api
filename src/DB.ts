@@ -86,7 +86,7 @@ module DB {
 		param : string
 		ip : string
 		time : Date
-		token : string
+		accessToken : string
 	}
 	
 	export interface Image {
@@ -171,7 +171,7 @@ module DB {
 	}
 	
 	class ActionsTableClass extends GenericTableClass<Action> {
-		constructor() {super("actions", ["user", "action", "object", "param", "ip", "time", "token"], "id");}
+		constructor() {super("actions", ["user", "action", "object", "param", "ip", "time", "accessToken"], "id");}
 		insert(data : Action) {
 			var rawData = <any>data;
 			DB.execute("INSERT INTO "+this.table+" (id, "+this.columns.join(", ")+") VALUES (uuid(), "+this.columns.map(()=>{return "?";}).join(", ")+");",
