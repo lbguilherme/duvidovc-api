@@ -115,7 +115,8 @@ class User {
 		DB.UsersTable.set(this.id, "firstName", userInfo.first_name);
 		DB.UsersTable.set(this.id, "lastName", userInfo.last_name);
 		DB.UsersTable.set(this.id, "gender", userInfo.gender);
-		DB.UsersTable.set(this.id, "birthday", new Date(userInfo.birthday));
+		if (userInfo.birthday)
+			DB.UsersTable.set(this.id, "birthday", new Date(userInfo.birthday));
 		DB.UsersTable.set(this.id, "email", userInfo.email);
 	}
 
@@ -144,7 +145,10 @@ class User {
 	getBirthday(token : string) {
 		var user = DB.UsersTable.fetch(this.id);
 		if (user && user.birthday) {
-			return user.birthday;
+			if (isNaN(user.birthday.getTime()))
+				return null;
+			else
+				return user.birthday;
 		} else {
 			try {
 				var userInfo = Facebook.getUser(token, this.id);

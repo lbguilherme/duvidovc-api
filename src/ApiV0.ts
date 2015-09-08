@@ -45,6 +45,8 @@ class ApiV0 extends ApiBase {
 
 		var firstLastNames = user.getFirstLastName(params.token);
 		var birthday = user.getBirthday(params.token);
+		if (!birthday || isNaN(birthday.getTime()))
+			birthday = null;
 		var gender = user.getGender(params.token);
 		var email = user.getEmail(params.token);
 
