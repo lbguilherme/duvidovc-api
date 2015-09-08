@@ -14,9 +14,9 @@ class DB {
 			],
 			keyspace: "duvido"
 		}
-		
+
 		DB.client = new Cassandra.Client(options);
-		
+
 		// Tries to connect in a loop. Database server may be still loading
 		var attempt = 1;
 		while (true) {
@@ -39,7 +39,7 @@ class DB {
 			}
 		}
 	}
-	
+
 	static execute(query : string, params? : any[]) {
 		return await(new Bluebird.Promise<Cassandra.ResultSet>((resolve, reject) => {
 			DB.client.execute(query, params, { prepare : true }, (err, result) => {
@@ -49,23 +49,23 @@ class DB {
 			})
 		}));
 	}
-	
+
 }
 
 module DB {
-	
+
 	export interface Data {
 		id : string
 		data : Buffer
 	}
-	
+
 	export interface Token {
 		accessToken : string
 		userId : string
 		expiresAt : Date,
 		scopes : string[]
 	};
-	
+
 	export interface User {
 		id : string
 		avatarDataId : string
@@ -78,7 +78,7 @@ module DB {
 		email : string
 		gcmTokens : string[]
 	}
-	
+
 	export interface Action {
 		user : string
 		action : string
@@ -88,7 +88,7 @@ module DB {
 		time : Date
 		accessToken : string
 	}
-	
+
 	export interface Image {
 		id : string
 		time : Date
@@ -97,7 +97,7 @@ module DB {
 		height : number
 		sizes : {[width : number] : string}
 	}
-	
+
 	export interface Challenge {
 		id : string
 		owner : string
@@ -109,13 +109,13 @@ module DB {
 		videoId : string
 		time : Date
 	}
-	
+
 	export interface Target {
 		challenge : string
 		id : string
 		status : string // "sent" | "received" | "submitted" | "accepted" | "refused" | "expired"
 	}
-	
+
 	export interface Submission {
 		challenge : string
 		target : string
@@ -127,7 +127,7 @@ module DB {
 		sentTime : Date
 		judgedTime : Date
 	}
-	
+
 	class GenericTableClass<T> {
 		constructor(protected table : string, protected columns : string[], protected key? : string) {}
 		fixFields(object : {}) {
@@ -160,16 +160,16 @@ module DB {
 			return rows.map(row => {return this.fixFields(row);});
 		}
 	}
-	
+
 	class TokensTableClass extends GenericTableClass<Token> {
 		constructor() {super("tokens", ["accessToken", "userId", "expiresAt", "scopes"], "accessToken");}
 	}
-	
+
 	class UsersTableClass extends GenericTableClass<User> {
 		constructor() {super("users", ["id", "avatarDataId", "friends", "firstName", "lastName",
 			"gender", "birthday", "email", "gcmTokens"], "id");}
 	}
-	
+
 	class ActionsTableClass extends GenericTableClass<Action> {
 		constructor() {super("actions", ["user", "action", "object", "param", "ip", "time", "accessToken"], "id");}
 		insert(data : Action) {
@@ -178,31 +178,31 @@ module DB {
 				this.columns.map(column => {return rawData[column];}));
 		}
 	}
-	
+
 	class DataTableClass extends GenericTableClass<Data> {
 		constructor() {super("data", ["id", "data"], "id");}
 	}
-	
+
 	class ImagesTableClass extends GenericTableClass<Image> {
 		constructor() {super("images", ["id", "time", "owner", "width", "height", "sizes"], "id");}
 	}
-	
+
 	class ChallengesTableClass extends GenericTableClass<Challenge> {
 		constructor() {super("challenges", ["id", "owner", "title", "details", "reward", "duration", "imageId", "videoId", "time"], "id");}
 	}
-	
+
 	class TargetsTableClass extends GenericTableClass<Target> {
 		constructor() {super("targets", ["challenge", "id", "status"]);}
 		markAs(challenge : string, target : string, status : string) {
 			DB.execute("UPDATE targets SET status=? WHERE challenge=? AND id=?;", [status, challenge, target]);
 		}
 	}
-	
+
 	class SubmissionsTableClass extends GenericTableClass<Submission> {
-		constructor() {super("submissions", ["challenge", "target", "id", "status", "text", 
+		constructor() {super("submissions", ["challenge", "target", "id", "status", "text",
 			"imageId", "videoId", "sentTime", "judgedTime"], "id");}
 	}
-	
+
 	export var TokensTable = new TokensTableClass();
 	export var UsersTable = new UsersTableClass();
 	export var ActionsTable = new ActionsTableClass();
@@ -211,7 +211,7 @@ module DB {
 	export var ChallengesTable = new ChallengesTableClass();
 	export var TargetsTable = new TargetsTableClass();
 	export var SubmissionsTable = new SubmissionsTableClass();
-	
+
 }
 
 /* Database Schema
@@ -297,7 +297,9 @@ CREATE TABLE submissions (
 	videoId text,
 	sentTime timestamp,
 	judgedTime timestamp,
-	PRIMARY KEY (challenge, target, id)
+	PRIMARY KEY (id)
 );
+CREATE INDEX ON submissions (challenge);
+CREATE INDEX ON submissions (target);
 
 */
