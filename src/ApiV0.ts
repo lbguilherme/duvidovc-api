@@ -588,6 +588,51 @@ class ApiV0 extends ApiBase {
 	}
 
 	/**
+	 * POST /v0/judge
+	 * - token: The owner token
+	 * - challenge: The challenge id
+	 * - submission: The submission id
+	 * - accepted: 1 or 0
+	 *
+	 * Returns: Nothing
+	 */
+	post_judge(resp : Http.ServerResponse, params : {token : string, submission : string, accepted : string, ip : string}) {
+		Utility.typeCheck(params, {token: "string", submission: "string", accepted: "string"}, "params");
+		var hasAccepted = params.accepted == "1";
+
+		var user = Duvido.User.fromToken(params.token);
+		var subm = Duvido.Challenge.getSubmission(params.submission);
+		var challenge = new Duvido.Challenge(subm.challenge);
+		var target = new Duvido.User(subm.target);
+
+		challenge.judgeSubmission(params.submission, hasAccepted);
+
+		resp.end();
+
+		var notification = new Notification(target);
+		notification.setData({
+			type: "basic-forward",
+			title: user.getName(params.token) + " " + (hasAccepted ? "aceitou" : "recusou"),
+			body: "sua resposta ao desafio '" + challenge.getData().title + "'",
+		});
+		notification.send();
+
+		var targetProfile = new Mixpanel.Profile(target.id);
+		targetProfile.add({"Own Submissions Judged": 1});
+
+		var userProfile = new Mixpanel.Profile(user.id);
+		userProfile.track("Submission judged", {
+			ip: params.ip,
+			"Challenge": challenge.id,
+			"Target": target.id,
+			"Submission": params.submission,
+			"Access Token": params.token
+		});
+
+		userProfile.add({"Submissions Judged": 1});
+	}
+
+	/**
 	 * GET /v0/challenges
 	 * - token: user token
 	 *

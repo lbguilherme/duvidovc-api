@@ -161,6 +161,10 @@ class Challenge {
 		this.markSubmitted(user);
 	}
 
+	judgeSubmission(id : string, hasAccepted : boolean) {
+		DB.SubmissionsTable.set(id, "status", hasAccepted ? "accepted" : "rejected");
+	}
+
 	markReceived(user : User) {
 		DB.TargetsTable.markAs(this.id, user.id, "received");
 	}
