@@ -155,8 +155,11 @@ module DB {
 		addToSet(key : string, field : string, value : any) {
 			DB.execute("UPDATE "+this.table+" SET "+field+"="+field+"+? WHERE "+this.key+"=?;", [[value], key]);
 		}
-		query(field : string, value : any) : T[] {
-			var rows = DB.execute("SELECT * FROM "+this.table+" WHERE "+field+"=?", [value]).rows;
+		query(obj : {[field : string] : any}) : T[] {
+			console.log(JSON.stringify(obj));
+			var fields = Object.keys(obj);
+			var values = fields.map(field => {return obj[field];});
+			var rows = DB.execute("SELECT * FROM "+this.table+" WHERE "+fields.map(field => {return field+"=?";}).join(" "), values).rows;
 			return rows.map(row => {return this.fixFields(row);});
 		}
 	}

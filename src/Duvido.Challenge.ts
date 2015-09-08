@@ -80,7 +80,7 @@ class Challenge {
 	}
 
 	static listFromOwner(owner : User) {
-		var list = DB.ChallengesTable.query("owner", owner.id);
+		var list = DB.ChallengesTable.query({"owner": owner.id});
 		return list.map(data => {
 			var c = new Challenge(data.id);
 			c.data = data;
@@ -89,7 +89,7 @@ class Challenge {
 	}
 
 	static listFromTarget(user : User) : Challenge[] {
-		var targetList = DB.TargetsTable.query("id", user.id)
+		var targetList = DB.TargetsTable.query({id: user.id})
 		targetList = targetList.filter(target => {return target.status == "sent" || target.status == "received"});
 		return targetList.map(target => {
 			return new Challenge(target.challenge);
@@ -119,8 +119,7 @@ class Challenge {
 
 	getTargets() {
 		if (!this.targets)
-			this.targets = DB.TargetsTable.query("challenge", this.id);
-			
+			this.targets = DB.TargetsTable.query({challenge: this.id});
 
 		return this.targets;
 	}
