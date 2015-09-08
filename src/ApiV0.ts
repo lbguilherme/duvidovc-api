@@ -336,6 +336,9 @@ class ApiV0 extends ApiBase {
 				id : string
 				name : string
 				status : string // "sent" | "received" | "read" | "submitted" | "rewarded"
+				lastSubmissionId : string
+				imageId : string
+				imageRatio : number
 			}[]
 		}[] = [];
 
@@ -364,6 +367,36 @@ class ApiV0 extends ApiBase {
 			})();
 		}));
 
+		var submissions : {[pair : string] : {subId : string, imageId : string}} = {};
+		challenges.forEach(challenge => {
+			var list = challenge.listSubmissions();
+			list = list.sort((a, b) => {
+				return b.sentTime.getTime() - a.sentTime.getTime();
+			});
+			list.forEach(submission => {
+				var pair = submission.challenge + "-" + submission.target;
+				submissions[pair] = {
+					subId: submission.id,
+					imageId: submission.imageId
+				};
+			});
+		});
+
+		var imageIds : string[] = [];
+		Object.keys(submissions).forEach(pair => {
+			var id = submissions[pair].imageId;
+			if (imageIds.indexOf(id) < 0)
+				imageIds.push(id);
+		});
+
+		// Fetch the ratio of each image
+		var ratios : {[imageId : string] : number} = {};
+		await(imageIds.map(imageId => {
+			return async(() => {
+				ratios[imageId] = new Duvido.Image(imageId).getRatio();
+			})();
+		}));
+
 		// Add all challenges to the final reply list
 		challenges.forEach(challenge => {
 			var c = challenge.getData();
@@ -376,11 +409,17 @@ class ApiV0 extends ApiBase {
 				duration: c.duration,
 				imageId: c.imageId,
 				videoId: c.videoId,
-				targets: challenge.getTargets().map(target => {return {
-					id: target.id,
-					name: names[target.id],
-					status: target.status
-				};})
+				targets: challenge.getTargets().map(target => {
+					var s = submissions[c.id+"-"+target.id];
+					return {
+						id: target.id,
+						name: names[target.id],
+						status: target.status,
+						lastSubmissionId: s ? s.subId : "",
+						imageId: s ? s.imageId : "",
+						imageRatio: s ? ratios[s.imageId] : 0
+					};
+				})
 			});
 		});
 

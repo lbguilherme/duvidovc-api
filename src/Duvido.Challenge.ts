@@ -96,6 +96,10 @@ class Challenge {
 		});
 	}
 
+	listSubmissions() {
+		return DB.SubmissionsTable.query({challenge: this.id});
+	}
+
 	refresh() {
 		if (this.hasExpired()) {
 			this.getTargets().forEach(target => {
