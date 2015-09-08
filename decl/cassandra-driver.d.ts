@@ -2,7 +2,7 @@
 
 declare module "cassandra-driver" {
 	import events = require("events");
-	
+
 	export interface ClientOptions {
 		contactPoints? : string[]
 		policies? : {
@@ -33,15 +33,16 @@ declare module "cassandra-driver" {
 		authProvider? : AuthProvider
 		sslOptions? : {}
 		encoding? : {}
+		keyspace? : string
 	}
-	
+
 	export interface QueryOptions {
-		
+
 	}
-	
+
 	type Queries = string[]|{query:string, params:{}}[]
 	type ResultCallback = (err : Error, result : ResultSet) => void
-	
+
 	export class Client extends events.EventEmitter {
 		hosts : HostMap
 		keyspace : string
@@ -62,7 +63,7 @@ declare module "cassandra-driver" {
 		shutdown(callback? : Function) : void
 		stream(query? : string, params? : any[]|{}, options? : QueryOptions, callback? : (err : Error) => void) : ResultStream
 	}
-	
+
 	export class HostMap extends events.EventEmitter {
 		forEach(callback : (host : Host) => void) : void
 		get(key : string) : Host
@@ -71,9 +72,9 @@ declare module "cassandra-driver" {
 		addMultiple(keys : string[]) : void;
 		set(key : string, value : Host) : void;
 		values() : Host[];
-		
+
 	}
-	
+
 	export class Host extends events.EventEmitter {
 		address : string
 		cassandraVersion : string
@@ -83,7 +84,7 @@ declare module "cassandra-driver" {
 		canBeConsideredAsUp() : boolean
 		isUp() : boolean
 	}
-	
+
 	export class Row {
 		[columnName : string] : any
 		forEach(callback : (value : any, columnName : string) => void) : void
@@ -91,35 +92,35 @@ declare module "cassandra-driver" {
 		keys() : string[]
 		values() : any[]
 	}
-	
+
 	export class ResultStream {
-		
+
 	}
-	
+
 	export class Metadata {
-		
+
 	}
-	
+
 	export class LoadBalancingPolicy {
-		
+
 	}
-	
+
 	export class RetryPolicy {
-		
+
 	}
-	
+
 	export class ReconnectionPolicy {
-		
+
 	}
-	
+
 	export class AddressTranslator {
-		
+
 	}
-	
+
 	export class AuthProvider {
-		
+
 	}
-	
+
 	export class ResultSet {
 		columns : string[]
 		info : {
@@ -133,5 +134,5 @@ declare module "cassandra-driver" {
 		rows : Row[]
 		first() : Row
 	}
-	
+
 }
