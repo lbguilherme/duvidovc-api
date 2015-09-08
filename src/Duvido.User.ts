@@ -146,9 +146,13 @@ class User {
 		if (user && user.birthday) {
 			return user.birthday;
 		} else {
-			var userInfo = Facebook.getUser(token, this.id);
-			this.setFromFacebookUser(userInfo);
-			return new Date(userInfo.birthday);
+			try {
+				var userInfo = Facebook.getUser(token, this.id);
+				this.setFromFacebookUser(userInfo);
+				return new Date(userInfo.birthday);
+			} catch (e) {
+				return null;
+			}
 		}
 	}
 
